@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+# copia locale della struttura agentica (vedi agents/README.md)
+/.claude/
+/CLAUDE.md

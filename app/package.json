@@ -1,0 +1,16 @@
+{
+  "name": "ti-vedo-bloccato",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Compagno che si accorge quando sei bloccato su un sito e ti dà un solo suggerimento mirato.",
+  "scripts": {
+    "start": "node server/server.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}

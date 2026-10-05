@@ -1,0 +1,94 @@
+/* Stile ispirato ai siti della PA (Bootstrap Italia), senza loghi ufficiali. */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Titillium Web", "Segoe UI", Arial, sans-serif;
+  color: #19191a;
+  background: #f5f6f7;
+  line-height: 1.5;
+}
+a { color: #0066cc; }
+
+.demo-ribbon {
+  background: #fff3cd; color: #5c4400; font-size: 13px;
+  padding: 6px 16px; border-bottom: 1px solid #e6d28a;
+}
+
+.pa-header { background: #0066cc; color: #fff; }
+.pa-slim { background: #004d99; font-size: 13px; padding: 6px 24px; }
+.pa-main { display: flex; align-items: center; gap: 16px; padding: 18px 24px; }
+.pa-logo {
+  width: 52px; height: 52px; border-radius: 50%; background: #fff; color: #0066cc;
+  display: grid; place-items: center; font-weight: 700;
+}
+.pa-title { font-size: 26px; font-weight: 700; }
+.pa-sub { font-size: 14px; opacity: 0.9; }
+
+main { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+
+.steps ol { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0 0 18px; counter-reset: s; }
+.steps li {
+  flex: 1; font-size: 13px; padding: 8px 10px; background: #e3e4e6; color: #5c6f82;
+  counter-increment: s;
+}
+.steps li::before { content: counter(s) ". "; font-weight: 700; }
+.steps li.done { background: #c9e2f5; color: #004d99; }
+.steps li[aria-current="step"] { background: #0066cc; color: #fff; font-weight: 600; }
+
+.step { background: #fff; padding: 28px; border: 1px solid #dcdfe3; }
+.step-count { margin: 0; font-size: 13px; color: #5c6f82; text-transform: uppercase; letter-spacing: 0.06em; }
+h1 { font-size: 26px; margin: 4px 0 16px; color: #17324d; }
+h2 { font-size: 18px; color: #17324d; }
+
+.legal { font-size: 13px; color: #5c6f82; text-align: justify; }
+.legal-long { max-height: 220px; overflow: auto; border: 1px solid #e3e4e6; padding: 4px 14px; margin: 16px 0; }
+
+.form-group { margin: 0 0 18px; border: 0; padding: 0; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+label, .label, legend { display: block; font-weight: 600; font-size: 15px; margin-bottom: 4px; color: #17324d; }
+input:not([type=radio]):not([type=checkbox]), select {
+  width: 100%; height: 40px; padding: 0 10px; font: inherit; font-size: 16px;
+  border: 0; border-bottom: 1px solid #5c6f82; background: #fff;
+}
+input[aria-invalid="true"] { border-bottom: 2px solid #d9364f; background: #fdf1f3; }
+.field-error { color: #d9364f; font-size: 13px; margin: 4px 0 0; min-height: 1em; }
+label.radio, label.check { font-weight: 400; display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+.consent { font-size: 13px; }
+
+.alert { border-left: 4px solid #d9364f; background: #fdf1f3; color: #8a1c2b; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
+
+.bar { display: flex; justify-content: space-between; margin-top: 24px; }
+.btn {
+  display: inline-flex; align-items: center; height: 42px; padding: 0 22px; font: inherit; font-weight: 600;
+  border: 2px solid #0066cc; color: #0066cc; background: #fff; cursor: pointer; text-decoration: none;
+}
+.btn-primary { background: #0066cc; color: #fff; }
+.btn:disabled { background: #e3e4e6; border-color: #e3e4e6; color: #9aa5b1; cursor: not-allowed; }
+
+.calendar { border: 1px solid #dcdfe3; padding: 10px; max-width: 420px; }
+.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cal-month { font-weight: 700; text-transform: capitalize; }
+/* Volutamente piccola e poco visibile, come spesso accade. */
+.cal-nav { border: 0; background: transparent; color: #8e9aa6; font-size: 16px; width: 22px; height: 22px; cursor: pointer; padding: 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-dow { font-size: 11px; color: #5c6f82; text-align: center; text-transform: uppercase; }
+.cal-day { height: 40px; border: 1px solid #c5c7c9; background: #fff; font: inherit; cursor: pointer; color: #0066cc; font-weight: 600; }
+.cal-day:disabled { background: #f0f1f2; color: #b1b8bf; border-color: #e3e4e6; cursor: default; font-weight: 400; }
+.cal-day[aria-pressed="true"] { background: #0066cc; color: #fff; }
+
+.slots { display: flex; gap: 8px; flex-wrap: wrap; }
+.slot { height: 38px; padding: 0 14px; border: 1px solid #0066cc; background: #fff; color: #0066cc; font: inherit; cursor: pointer; }
+.slot[aria-pressed="true"] { background: #0066cc; color: #fff; }
+
+.summary { display: grid; grid-template-columns: 160px 1fr; gap: 6px 12px; font-size: 15px; }
+.summary dt { color: #5c6f82; }
+.summary dd { margin: 0; font-weight: 600; }
+
+.ok { font-size: 18px; color: #008758; }
+.metrics table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.metrics th, .metrics td { border: 1px solid #dcdfe3; padding: 6px 8px; text-align: left; }
+.metrics thead th { background: #f0f1f2; }
+
+.pa-footer { text-align: center; font-size: 12px; color: #5c6f82; padding: 24px; }
+
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }

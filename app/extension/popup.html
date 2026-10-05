@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<title>Ti vedo bloccato</title>
+<style>
+  body { width: 300px; margin: 0; padding: 16px; font: 15px/1.5 system-ui, "Segoe UI", Arial, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 17px; margin: 0 0 12px; color: #460073; }
+  h1 span { color: #A100FF; }
+  fieldset { border: 0; padding: 0; margin: 0 0 14px; }
+  legend { font-weight: 600; margin-bottom: 6px; }
+  label { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+  input[type=radio], input[type=checkbox] { width: 18px; height: 18px; accent-color: #A100FF; }
+  .status { font-size: 13px; color: #555; border-top: 1px solid #ddd; padding-top: 10px; }
+  .ok { color: #1d7a3a; } .warn { color: #8a5a00; }
+</style>
+</head>
+<body>
+  <h1><span>&gt;</span> Ti vedo bloccato</h1>
+  <label><input type="checkbox" id="enabled" /> Attivo su tutte le pagine</label>
+  <fieldset>
+    <legend>Quanto spesso intervenire</legend>
+    <label><input type="radio" name="sens" value="bassa" /> Di rado</label>
+    <label><input type="radio" name="sens" value="media" /> Normale</label>
+    <label><input type="radio" name="sens" value="alta" /> Spesso</label>
+  </fieldset>
+  <p class="status" id="status">Controllo l'assistente…</p>
+  <script src="popup.js"></script>
+</body>
+</html>

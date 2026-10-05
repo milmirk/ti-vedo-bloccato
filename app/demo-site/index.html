@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agenda CIE – Prenotazione appuntamento (replica dimostrativa)</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="demo-ribbon" role="note">
+    Replica dimostrativa per l'hackathon Hagenthon. Non è il sito ufficiale e non invia dati.
+    <span id="mode-label"></span>
+  </div>
+
+  <header class="pa-header">
+    <div class="pa-slim">Ministero dell'Interno</div>
+    <div class="pa-main">
+      <div class="pa-logo" aria-hidden="true">CIE</div>
+      <div>
+        <div class="pa-title">Agenda CIE</div>
+        <div class="pa-sub">Prenotazione appuntamento per la Carta d'Identità Elettronica</div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <nav class="steps" aria-label="Avanzamento">
+      <ol>
+        <li data-step="1">Comune e motivo</li>
+        <li data-step="2">Dati del richiedente</li>
+        <li data-step="3">Data e sede</li>
+        <li data-step="4">Riepilogo</li>
+      </ol>
+    </nav>
+
+    <!-- PASSO 1 -->
+    <form class="step" id="step-1" data-step="1" novalidate>
+      <p class="step-count">Passo 1 di 4</p>
+      <h1>Comune e motivo della richiesta</h1>
+      <p class="legal">
+        Ai sensi del D.M. 23 dicembre 2015 e successive modificazioni, la richiesta della Carta d'Identità
+        Elettronica può essere effettuata presso il Comune di residenza o di dimora. La prenotazione tramite il
+        presente servizio non sostituisce la verifica dei requisiti da parte dell'ufficio anagrafe, che potrà
+        richiedere documentazione integrativa ove ritenuto necessario. I cittadini AIRE devono rivolgersi al
+        Consolato competente. Il pagamento dei diritti di segreteria avviene secondo le modalità stabilite da
+        ciascun Comune.
+      </p>
+      <div class="form-group">
+        <label for="comune">Comune di residenza o dimora *</label>
+        <select id="comune" required aria-required="true">
+          <option value="">— seleziona —</option>
+          <option>Bologna</option>
+          <option>Milano</option>
+          <option>Napoli</option>
+          <option>Roma</option>
+          <option>Torino</option>
+        </select>
+      </div>
+      <fieldset class="form-group">
+        <legend>Motivo della richiesta *</legend>
+        <label class="radio"><input type="radio" name="motivo" value="primo" required aria-required="true" /> Primo rilascio</label>
+        <label class="radio"><input type="radio" name="motivo" value="scadenza" /> Rinnovo per scadenza</label>
+        <label class="radio"><input type="radio" name="motivo" value="furto" /> Smarrimento o furto</label>
+        <label class="radio"><input type="radio" name="motivo" value="deterioramento" /> Deterioramento</label>
+      </fieldset>
+      <div class="bar">
+        <span></span>
+        <button type="submit" class="btn btn-primary">Avanti</button>
+      </div>
+    </form>
+
+    <!-- PASSO 2 -->
+    <form class="step" id="step-2" data-step="2" novalidate hidden>
+      <p class="step-count">Passo 2 di 4</p>
+      <h1>Dati del richiedente</h1>
+      <div class="grid">
+        <div class="form-group">
+          <label for="nome">Nome *</label>
+          <input id="nome" autocomplete="given-name" required aria-required="true" aria-describedby="nome-err" />
+          <p class="field-error" id="nome-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="cognome">Cognome *</label>
+          <input id="cognome" autocomplete="family-name" required aria-required="true" aria-describedby="cognome-err" />
+          <p class="field-error" id="cognome-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="cf">Codice fiscale *</label>
+          <input id="cf" required aria-required="true" aria-describedby="cf-err" />
+          <p class="field-error" id="cf-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="tel">Telefono</label>
+          <input id="tel" type="tel" autocomplete="tel" aria-describedby="tel-err" />
+          <p class="field-error" id="tel-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail *</label>
+          <input id="email" type="text" autocomplete="email" required aria-required="true" aria-describedby="email-err" />
+          <p class="field-error" id="email-err"></p>
+        </div>
+        <div class="form-group">
+          <label for="email2">Conferma e-mail *</label>
+          <input id="email2" type="text" required aria-required="true" aria-describedby="email2-err" />
+          <p class="field-error" id="email2-err"></p>
+        </div>
+      </div>
+      <div class="bar">
+        <button type="button" class="btn" data-back>Indietro</button>
+        <button type="submit" class="btn btn-primary">Avanti</button>
+      </div>
+    </form>
+
+    <!-- PASSO 3 -->
+    <form class="step" id="step-3" data-step="3" novalidate hidden>
+      <p class="step-count">Passo 3 di 4</p>
+      <h1>Scegli data e sede</h1>
+      <div class="form-group">
+        <label for="sede">Sede *</label>
+        <select id="sede" required aria-required="true">
+          <option value="">— seleziona —</option>
+          <option>Ufficio anagrafe centrale</option>
+          <option>Sportello di quartiere – Municipio II</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <span class="label" id="cal-label">Data dell'appuntamento *</span>
+        <div class="calendar" role="group" aria-labelledby="cal-label">
+          <div class="cal-head">
+            <span class="cal-month" id="cal-month"></span>
+            <button type="button" class="cal-nav" id="cal-next" aria-label="Mese successivo" title="Mese successivo">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <input type="hidden" id="data" />
+      </div>
+      <div class="form-group" id="slot-box" hidden>
+        <span class="label">Orario *</span>
+        <div class="slots" id="slots"></div>
+      </div>
+      <div class="bar">
+        <button type="button" class="btn" data-back>Indietro</button>
+        <button type="submit" class="btn btn-primary" id="avanti-3" disabled>Avanti</button>
+      </div>
+    </form>
+
+    <!-- PASSO 4 -->
+    <form class="step" id="step-4" data-step="4" novalidate hidden>
+      <p class="step-count">Passo 4 di 4</p>
+      <h1>Riepilogo e conferma</h1>
+      <dl class="summary" id="summary"></dl>
+      <div class="legal legal-long">
+        <h2>Informativa sul trattamento dei dati personali</h2>
+        <p>Ai sensi dell'art. 13 del Regolamento (UE) 2016/679, si informa che i dati personali forniti saranno
+        trattati dal Ministero dell'Interno, in qualità di Titolare del trattamento, esclusivamente per le
+        finalità connesse alla gestione della prenotazione e all'erogazione del servizio di emissione della
+        Carta d'Identità Elettronica. Il trattamento è effettuato con strumenti informatici e telematici, nel
+        rispetto dei principi di liceità, correttezza e trasparenza.</p>
+        <p>I dati saranno conservati per il tempo strettamente necessario al conseguimento delle finalità per le
+        quali sono raccolti e potranno essere comunicati ai Comuni competenti e all'Istituto Poligrafico e Zecca
+        dello Stato per le attività di produzione e consegna del documento. L'interessato può esercitare i
+        diritti di cui agli artt. 15-22 del Regolamento.</p>
+        <p>Il conferimento dei dati è obbligatorio ai fini della prenotazione; l'eventuale rifiuto comporta
+        l'impossibilità di completare la procedura. Per ulteriori informazioni è possibile contattare il
+        Responsabile della protezione dei dati all'indirizzo indicato nella sezione Privacy del portale.</p>
+      </div>
+      <div class="form-group consent">
+        <label class="check"><input type="checkbox" id="privacy" required aria-required="true" />
+          Dichiaro di aver preso visione dell'informativa ai sensi dell'art. 13 del Reg. UE 2016/679</label>
+      </div>
+      <div class="bar">
+        <button type="button" class="btn" data-back>Indietro</button>
+        <button type="submit" class="btn btn-primary" id="conferma" disabled>Conferma prenotazione</button>
+      </div>
+    </form>
+
+    <!-- ESITO -->
+    <section class="step" id="step-5" data-step="5" hidden>
+      <h1>Prenotazione confermata</h1>
+      <p class="ok">Il tuo appuntamento è registrato. Codice prenotazione: <strong id="codice"></strong></p>
+      <p>Riceverai un promemoria all'indirizzo e-mail indicato. Porta con te una fototessera e il documento scaduto o la denuncia.</p>
+      <div class="metrics" id="metrics" aria-label="Metriche della prova"></div>
+      <p><a class="btn" href="./">Nuova prova</a></p>
+    </section>
+  </main>
+
+  <footer class="pa-footer">Replica a scopo dimostrativo · Hagenthon · Accenture Application Engineering</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

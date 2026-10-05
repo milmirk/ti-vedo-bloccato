@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ti vedo bloccato · Hagenthon</title>
+<style>
+  :root {
+    --p: #A100FF;
+    --p2: #7500C0;
+    --p3: #460073;
+    --pl: #BE82FF;
+    --pll: #DCAFFF;
+    --rose: #FF50A0;
+    --ok: #4ADE80;
+    --t1: rgba(255,255,255,0.92);
+    --t2: rgba(255,255,255,0.62);
+    --t3: rgba(255,255,255,0.38);
+    --line: rgba(255,255,255,0.12);
+    --ease: cubic-bezier(.2,.7,.2,1);
+    --pa: #0066CC;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden; }
+  body { font-family: "Graphik", "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+  .stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; }
+
+  .slide {
+    position: absolute; inset: 0; padding: 120px 150px 110px; display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; transition: opacity .7s var(--ease), visibility .7s;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+
+  .r { opacity: 0; transform: translateY(46px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: calc(var(--d, 0) * 110ms); }
+  .slide.active .r { opacity: 1; transform: none; }
+  .frag { opacity: 0; transform: translateY(28px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .frag.on { opacity: 1; transform: none; }
+
+  .glow { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; background: radial-gradient(circle, rgba(161,0,255,.32), rgba(161,0,255,0) 62%); pointer-events: none; filter: blur(10px); }
+  .bigmark {
+    position: absolute; right: -60px; bottom: -260px; font-size: 1500px; line-height: 1; font-weight: 800;
+    background: linear-gradient(160deg, rgba(161,0,255,.55), rgba(70,0,115,0) 70%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; pointer-events: none; user-select: none;
+  }
+
+  .eyebrow { font-size: 22px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--pl); }
+  h1 { font-size: 190px; line-height: .95; letter-spacing: -.045em; margin: 34px 0 0; font-weight: 800; }
+  h2 { font-size: 88px; line-height: 1.02; letter-spacing: -.035em; margin: 26px 0 0; font-weight: 750; }
+  h3 { font-size: 38px; margin: 0; letter-spacing: -.015em; font-weight: 700; }
+  p { margin: 0; }
+  .gt { color: var(--p); }
+  .grad { background: linear-gradient(90deg, var(--pll), var(--p)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 40px; line-height: 1.35; color: var(--t2); max-width: 1300px; }
+  .lead b { color: #fff; }
+  .muted { color: var(--t2); }
+  .small { font-size: 24px; color: var(--t3); }
+  .spacer { flex: 1; }
+
+  .card { border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 28px; padding: 42px; }
+  .card.hot { border-color: rgba(161,0,255,.55); background: linear-gradient(160deg, rgba(161,0,255,.18), rgba(161,0,255,.03)); }
+  .card p.desc { font-size: 28px; line-height: 1.35; color: var(--t2); margin-top: 18px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+
+  .stat { font-size: 112px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .stat small { font-size: 40px; font-weight: 600; color: var(--pl); letter-spacing: 0; }
+
+  /* Persona */
+  .persona { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 40px; align-items: start; }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+  .facts li { font-size: 34px; line-height: 1.35; color: var(--t1); padding-left: 44px; position: relative; }
+  .facts li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .facts li b { color: #fff; }
+  .goal { font-size: 26px; letter-spacing: .25em; text-transform: uppercase; color: var(--pl); font-weight: 700; }
+
+  /* Punti di blocco */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 56px; }
+  .wall .card { padding: 34px; display: flex; flex-direction: column; }
+  .wall .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .wall h3 { font-size: 36px; margin-top: 12px; }
+  .wall p { font-size: 25px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .mini { margin-top: auto; border-radius: 14px; background: #fff; color: #19191a; padding: 18px; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; }
+  .wall p + .mini { margin-top: 24px; }
+  .mini .lbl { font-size: 18px; font-weight: 700; color: #17324d; }
+  .mini .in { font-family: Consolas, monospace; font-size: 18px; border-bottom: 2px solid #d9364f; background: #fdf1f3; padding: 6px 8px; margin-top: 6px; }
+  .mini .err { color: #d9364f; font-size: 17px; margin-top: 6px; }
+  .mini .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+  .mini .cal i { height: 22px; background: #eceef0; border-radius: 3px; }
+  .mini .calhead { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
+  .mini .calhead span { color: #b1b8bf; font-weight: 400; font-size: 14px; }
+  .mini .dis { display: inline-block; background: #e3e4e6; color: #9aa5b1; font-weight: 700; font-size: 18px; padding: 10px 16px; }
+  .mini .clic { display: block; color: var(--rose); font-weight: 800; font-size: 18px; margin-top: 8px; }
+  .mini .tabs { display: flex; gap: 6px; }
+  .mini .tabs span { flex: 1; font-size: 15px; padding: 8px 10px; border-radius: 8px 8px 0 0; background: #eceef0; color: #5c6f82; }
+  .mini .tabs span.on { background: var(--pa); color: #fff; }
+
+  /* Mercato */
+  .quad { display: grid; grid-template-columns: 240px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 20px; margin-top: 40px; }
+  .quad .ax { font-size: 20px; letter-spacing: .2em; text-transform: uppercase; color: var(--t3); font-weight: 700; display: flex; align-items: center; line-height: 1.4; }
+  .quad .ax.c { justify-content: center; }
+  .quad .card { padding: 30px 36px; }
+  .quad .card b { font-size: 34px; display: block; }
+  .quad .card span { display: block; font-size: 24px; color: var(--t2); margin-top: 10px; line-height: 1.35; }
+  .quad .card .tag { font-size: 17px; letter-spacing: .15em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin: 0 0 10px; }
+  .quad .hot .tag { color: var(--pll); }
+
+  /* Ciclo */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 70px; }
+  .step { border-radius: 26px; padding: 34px; border: 1px solid var(--line); background: rgba(255,255,255,.035); position: relative; }
+  .step .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .step h3 { margin-top: 14px; font-size: 34px; }
+  .step p { font-size: 27px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .step p b { color: #fff; }
+  .step.bad { border-color: rgba(255,80,160,.7); background: rgba(255,80,160,.08); }
+  .step.good { border-color: rgba(74,222,128,.7); background: rgba(74,222,128,.07); }
+  .step.hotstep { border-color: rgba(161,0,255,.6); background: rgba(161,0,255,.1); }
+  .mono { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 24px; background: rgba(0,0,0,.4); border-radius: 12px; padding: 14px 16px; margin-top: 18px; color: #fff; line-height: 1.4; }
+  .x { color: var(--rose); font-weight: 800; }
+  .v { color: var(--ok); font-weight: 800; }
+
+  /* Prima e dopo: replica della pagina */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 26px; align-items: start; }
+  .ba .lab { font-size: 22px; letter-spacing: .3em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin-bottom: 16px; }
+  .ba .lab.after { color: var(--pll); }
+  .page { background: #fff; color: #19191a; border-radius: 18px; overflow: hidden; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .page .bar { background: var(--pa); color: #fff; font-weight: 700; font-size: 20px; padding: 12px 24px; }
+  .page .body { padding: 16px 28px 18px; }
+  .page .count { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5c6f82; }
+  .page .h { font-size: 28px; font-weight: 700; color: #17324d; margin: 2px 0 12px; }
+  .page .alert { border-left: 4px solid #d9364f; background: #fdf1f3; color: #8a1c2b; padding: 6px 12px; font-size: 16px; margin-bottom: 10px; }
+  .page .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
+  .page .f .l { font-size: 16px; font-weight: 700; color: #17324d; }
+  .page .f .i { border-bottom: 1px solid #5c6f82; height: 30px; font-family: Consolas, monospace; font-size: 16px; padding: 5px 4px 0; }
+  .page .f.bad .i { border-bottom: 2px solid #d9364f; background: #fdf1f3; }
+  .page .f .e { color: #d9364f; font-size: 14px; height: 18px; margin-top: 3px; }
+  .page .btns { display: flex; justify-content: space-between; margin-top: 16px; }
+  .page .btns span { border: 2px solid var(--pa); color: var(--pa); font-weight: 700; font-size: 17px; padding: 7px 20px; }
+  .page .btns span.pri { background: var(--pa); color: #fff; }
+  .tvb { margin: 14px 0 2px; border: 2px solid var(--p3); border-left-width: 6px; border-radius: 12px; padding: 12px 16px; font-family: system-ui, "Segoe UI", Arial, sans-serif; box-shadow: 0 6px 20px rgba(10,0,20,.12); }
+  .tvb .t { font-weight: 700; color: var(--p3); font-size: 17px; }
+  .tvb .t .gt { font-size: 21px; margin-right: 6px; }
+  .tvb .tx { font-size: 18px; line-height: 1.42; margin-top: 4px; color: #1a1a1a; }
+  .tvb .acts { display: flex; gap: 8px; margin-top: 10px; }
+  .tvb .acts span { border: 2px solid var(--p3); color: var(--p3); border-radius: 8px; font-weight: 700; font-size: 14px; padding: 5px 12px; }
+  .tvb .acts span.pri { background: var(--p); border-color: var(--p); color: #fff; }
+  .ba .cap { font-size: 25px; color: var(--t2); margin-top: 14px; line-height: 1.32; }
+  .ba .cap b { color: #fff; }
+
+  /* Segnali */
+  .sig { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 48px; }
+  .sig .card { padding: 26px 30px; }
+  .sig .when { font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--pll); font-weight: 700; }
+  .sig h3 { font-size: 30px; margin-top: 10px; }
+  .sig p { font-size: 23px; color: var(--t2); line-height: 1.35; margin-top: 10px; }
+
+  /* Architettura */
+  .arch { position: relative; margin-top: 40px; height: 610px; }
+  .node { position: absolute; border-radius: 26px; padding: 26px 30px; width: 400px; }
+  .node .k { font-size: 18px; letter-spacing: .25em; text-transform: uppercase; font-weight: 700; }
+  .node b { display: block; font-size: 36px; margin-top: 8px; }
+  .node span { display: block; font-size: 23px; color: var(--t2); margin-top: 8px; line-height: 1.3; }
+  .node.ai { border: 2px solid var(--p); background: #1b0a2b; }
+  .node.ai .k { color: var(--pl); }
+  .node.code { border: 2px dashed rgba(255,255,255,.55); background: #0e0e10; }
+  .node.code .k { color: rgba(255,255,255,.7); }
+  .node.ui { border: 2px solid #fff; background: #fff; color: #000; }
+  .node.ui .k { color: var(--p2); }
+  .node.ui span { color: #333; }
+  .arch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .arch path { fill: none; stroke: rgba(190,130,255,.7); stroke-width: 3; stroke-dasharray: 10 10; }
+  .slide.active .arch path { animation: dash 1.6s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -40; } }
+
+  /* Liste a colonne */
+  .cols3 h3 { font-size: 36px; }
+  .cols3 ul { list-style: none; padding: 0; margin: 22px 0 0; }
+  .cols3 li { font-size: 28px; line-height: 1.35; color: var(--t1); padding-left: 34px; position: relative; margin-bottom: 16px; }
+  .cols3 li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .cols3 ul.no li::before { content: "×"; color: var(--rose); }
+
+  .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; }
+  .feat .card { padding: 28px 32px; }
+  .feat .ic { font-size: 48px; font-weight: 800; color: var(--p); line-height: 1; height: 54px; }
+  .feat h3 { margin-top: 12px; font-size: 32px; }
+  .feat p { font-size: 24px; color: var(--t2); line-height: 1.35; margin-top: 12px; }
+
+  .tree { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 25px; line-height: 1.55; color: var(--t1); white-space: pre; }
+  .tree .c { color: var(--t3); }
+  .tree .h { color: var(--pl); font-weight: 700; }
+  table.rev { width: 100%; border-collapse: collapse; font-size: 24px; }
+  table.rev th { text-align: left; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: var(--pl); padding: 0 18px 14px 0; font-weight: 700; }
+  table.rev td { padding: 14px 18px 14px 0; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.32; color: var(--t1); }
+  table.rev td:first-child { font-weight: 700; white-space: nowrap; }
+
+  .demo { counter-reset: d; display: grid; grid-template-columns: 1fr 1fr; gap: 26px 60px; margin-top: 60px; }
+  .demo li { list-style: none; font-size: 34px; line-height: 1.3; display: grid; grid-template-columns: 76px 1fr; align-items: start; }
+  .demo li::before { counter-increment: d; content: counter(d); font-size: 30px; font-weight: 800; color: #000; background: var(--p); border-radius: 50%; width: 54px; height: 54px; display: grid; place-items: center; }
+  .demo li span { display: block; font-size: 25px; color: var(--t2); margin-top: 6px; }
+  .url { font-family: "Cascadia Code", Consolas, monospace; font-size: 26px; color: var(--pll); }
+
+  .closing h2 { font-size: 120px; }
+
+  .progress { position: fixed; left: 0; top: 0; height: 5px; width: 100%; background: rgba(255,255,255,.06); z-index: 10; }
+  .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--p2), var(--p)); transition: width .5s var(--ease); }
+  .hud { position: fixed; right: 28px; bottom: 20px; font-size: 14px; letter-spacing: .2em; color: rgba(255,255,255,.4); z-index: 10; font-variant-numeric: tabular-nums; }
+  .brandbar { position: absolute; left: 150px; right: 150px; bottom: 44px; display: flex; justify-content: space-between; font-size: 18px; letter-spacing: .25em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+  .brandbar b { color: rgba(255,255,255,.55); font-weight: 700; }
+  .help { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.4); z-index: 10; letter-spacing: .05em; transition: opacity .6s; }
+  .help.gone { opacity: 0; }
+  @media print { .progress, .hud, .help { display: none; } }
+</style>
+</head>
+<body>
+<div class="progress"><span id="bar"></span></div>
+<div class="hud" id="hud"></div>
+<div class="help">← → per navigare · F schermo intero</div>
+
+<div class="deck">
+<div class="stage" id="stage">
+
+  <!-- 1 · Titolo -->
+  <section class="slide" data-title="Titolo">
+    <div class="glow" style="left:-400px; top:-500px"></div>
+    <div class="bigmark">&gt;</div>
+    <div class="spacer"></div>
+    <span class="eyebrow r" style="--d:1">Hagenthon · Tema 01 · Accessibilità digitale</span>
+    <h1 class="r" style="--d:2">Ti vedo<br>bloccato<span class="gt">&gt;</span></h1>
+    <p class="lead r" style="--d:4; margin-top:46px; max-width:1200px">Un compagno che <b>si accorge da solo</b> quando ti fermi su un servizio pubblico online, e ti dà <b>un solo suggerimento</b>, nel punto giusto.</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span>github.com/milmirk/ti-vedo-bloccato</span></div>
+  </section>
+
+  <!-- 2 · Problema -->
+  <section class="slide" data-title="Il problema">
+    <span class="eyebrow r">Il problema</span>
+    <h2 class="r" style="--d:1">Il servizio c'è.<br><span class="grad">Arrivare in fondo è un altro discorso.</span></h2>
+    <div class="grid3" style="margin-top:56px">
+      <div class="card r" style="--d:3"><div class="stat">4<small> passi</small></div><p class="desc">per prenotare la Carta d'Identità Elettronica su Agenda CIE: comune, dati, data e sede, conferma.</p></div>
+      <div class="card r" style="--d:4"><div class="stat">4<small> punti di attrito</small></div><p class="desc">un errore in codice, un calendario vuoto, un pulsante che non risponde, nessun "dove eri rimasto".</p></div>
+      <div class="card hot r" style="--d:5"><div class="stat">0<small> segnali</small></div><p class="desc">Il sito non sa che sei bloccato. Nessuno se ne accorge, e nessuno ti aiuta in quel momento.</p></div>
+    </div>
+    <p class="lead r" style="--d:7; margin-top:48px; font-size:36px">Per chi ha ADHD, fatica cognitiva o poca esperienza digitale, un solo intoppo basta per <b>chiudere la scheda e rimandare</b>.</p>
+  </section>
+
+  <!-- 3 · Persona -->
+  <section class="slide" data-title="Persona">
+    <div class="glow" style="right:-600px; top:-300px"></div>
+    <span class="eyebrow r">Persona &amp; barriera</span>
+    <div class="persona">
+      <div>
+        <h2 class="r" style="--d:1; margin-top:0; font-size:112px">Luca,<br><span class="grad">29 anni.</span></h2>
+        <p class="lead r" style="--d:3; margin-top:40px">Ha l'ADHD. Sa usare il computer. Deve <b>rinnovare la Carta d'Identità</b>, che scade tra un mese.</p>
+      </div>
+      <div>
+        <p class="goal r" style="--d:2">Cosa gli succede</p>
+        <ul class="facts r" style="--d:4; margin-top:26px">
+          <li>Si distrae a metà modulo e, quando torna, <b>non sa più dove era</b>.</li>
+          <li>I testi lunghi lo stancano: legge le prime righe e salta il resto.</li>
+          <li>Se un pulsante non risponde, ci clicca di nuovo. <b>Poi lascia perdere.</b></li>
+          <li>Oggi l'alternativa è chiedere a qualcuno, o andare allo sportello senza appuntamento.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Dove si ferma -->
+  <section class="slide" data-title="Dove si ferma">
+    <span class="eyebrow r">La barriera</span>
+    <h2 class="r" style="--d:1">Dove si ferma Luca.</h2>
+    <div class="wall">
+      <div class="card r" style="--d:2">
+        <span class="n">1 · Passo 2</span><h3>Si distrae</h3>
+        <p>Cambia scheda per cercare la tessera sanitaria. Quando torna: "dov'ero?"</p>
+        <div class="mini"><div class="tabs"><span>Agenda CIE</span><span class="on">Mail</span><span>Foto tessera</span></div></div>
+      </div>
+      <div class="card r" style="--d:3">
+        <span class="n">2 · Passo 2</span><h3>Errore in codice</h3>
+        <p>Scrive il codice fiscale con gli spazi, come è stampato sulla tessera.</p>
+        <div class="mini"><div class="lbl">Codice fiscale *</div><div class="in">RSS LCU 96R05 H501X</div><div class="err">Valore non conforme (ERR_CF_016)</div></div>
+      </div>
+      <div class="card r" style="--d:4">
+        <span class="n">3 · Passo 3</span><h3>Calendario vuoto</h3>
+        <p>Tutti i giorni del mese sono grigi. La freccia per il mese dopo è minuscola.</p>
+        <div class="mini"><div class="calhead">ottobre 2026 <span>›</span></div><div class="cal"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      </div>
+      <div class="card hot r" style="--d:5">
+        <span class="n">4 · Passo 4</span><h3>Pulsante morto</h3>
+        <p>«Conferma» non risponde: manca la spunta sull'informativa, in fondo a un testo legale.</p>
+        <div class="mini"><span class="dis">Conferma prenotazione</span><span class="clic">clic… clic…</span></div>
+      </div>
+    </div>
+    <p class="lead r" style="--d:7; margin-top:44px; font-size:34px">In ognuno di questi punti Luca <b>chiude la scheda</b>. Il sito non lo saprà mai.</p>
+  </section>
+
+  <!-- 5 · Mercato -->
+  <section class="slide" data-title="Mercato">
+    <span class="eyebrow r">Verifica di mercato</span>
+    <h2 class="r" style="--d:1">Chi vede il blocco lavora per il sito.<br><span class="grad">Chi aiuta la persona aspetta che chieda.</span></h2>
+    <div class="quad">
+      <span></span>
+      <span class="ax c r" style="--d:2">Interviene da solo</span>
+      <span class="ax c r" style="--d:2">Solo se interpellato</span>
+      <span class="ax r" style="--d:3">Lo installa<br>il sito</span>
+      <div class="card r" style="--d:3"><span class="tag">esiste</span><b>WalkMe, Whatfix, Pendo · Clarity</b><span>Guide nei software aziendali e statistiche sui "rage click": servono a chi gestisce il sito.</span></div>
+      <div class="card r" style="--d:4"><span class="tag">esiste</span><b>Chatbot dei siti</b><span>Rispondono alle domande, ma non sanno dove ti sei fermato.</span></div>
+      <span class="ax r" style="--d:5">Lo installa<br>la persona</span>
+      <div class="card hot r" style="--d:5"><span class="tag">nessun prodotto commerciale trovato</span><b>Ti vedo bloccato</b><span>Si accorge del blocco e propone l'azione successiva, su un sito che non l'ha previsto.</span></div>
+      <div class="card r" style="--d:6"><span class="tag">esiste</span><b>Gemini Live, Copilot Vision</b><span>Ottimi, ma devi sapere di essere bloccato, e chiedere.</span></div>
+    </div>
+    <p class="small r" style="--d:7; margin-top:18px">21 idee verificate per i tre temi, circa 145 ricerche web in italiano, inglese e tedesco (5 ottobre 2026). Esistono solo prototipi di ricerca o da hackathon.</p>
+  </section>
+
+  <!-- 6 · Soluzione -->
+  <section class="slide" data-title="La soluzione">
+    <div class="glow" style="left:20%; top:-800px"></div>
+    <span class="eyebrow r">La soluzione</span>
+    <h2 class="r" style="--d:1">Si accorge. Capisce.<br><span class="grad">Ti dice una cosa sola.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Percepisce</span><h3>7 segnali</h3><p>Clic su qualcosa di disattivato, errori, rientro dopo una distrazione, inattività, avanti e indietro.</p></div>
+      <div class="step r" style="--d:4"><span class="n">2 · Capisce</span><h3>Il punto esatto</h3><p>Passo, campo, errore mostrato, campi obbligatori vuoti. <b>Mai quello che scrivi.</b></p></div>
+      <div class="step hotstep r" style="--d:5"><span class="n">3 · Aiuta</span><h3>Subito, in pagina</h3><p>Un suggerimento in <b>0,2 secondi</b>, inserito accanto al punto del blocco. «Mostrami dove» ti ci porta.</p></div>
+      <div class="step r" style="--d:6"><span class="n">4 · Impara</span><h3>Come vuoi tu</h3><p>"Non ora" lo rende più discreto, "Mi è servito" più presente. Pausa di 10 minuti con un clic.</p></div>
+    </div>
+    <p class="lead r" style="--d:8; margin-top:60px">È un'estensione Chrome: la installa <b>la persona</b>, e funziona sui siti della PA così come sono.</p>
+  </section>
+
+  <!-- 7 · Prima e dopo -->
+  <section class="slide" data-title="Prima e dopo">
+    <span class="eyebrow r">Prima e dopo</span>
+    <h2 class="r" style="--d:1; font-size:72px">Dentro la pagina, <span class="grad">non sopra.</span></h2>
+    <div class="ba">
+      <div class="r" style="--d:2">
+        <div class="lab">Prima</div>
+        <div class="page">
+          <div class="bar">Agenda CIE</div>
+          <div class="body">
+            <div class="count">Passo 2 di 4</div>
+            <div class="h">Dati del richiedente</div>
+            <div class="alert">Sono presenti errori nel modulo (1).</div>
+            <div class="fields">
+              <div class="f"><div class="l">Nome *</div><div class="i">Luca</div><div class="e"></div></div>
+              <div class="f"><div class="l">Cognome *</div><div class="i">Rossi</div><div class="e"></div></div>
+              <div class="f bad"><div class="l">Codice fiscale *</div><div class="i">RSS LCU 96R05 H501X</div><div class="e">Valore non conforme (ERR_CF_016)</div></div>
+              <div class="f"><div class="l">Telefono</div><div class="i"></div><div class="e"></div></div>
+            </div>
+            <div class="btns"><span>Indietro</span><span class="pri">Avanti</span></div>
+          </div>
+        </div>
+        <p class="cap">Luca riprova uguale. L'errore resta. <b>Chiude.</b></p>
+      </div>
+      <div class="frag">
+        <div class="lab after">Dopo · con Ti vedo bloccato</div>
+        <div class="page">
+          <div class="bar">Agenda CIE</div>
+          <div class="body">
+            <div class="count">Passo 2 di 4</div>
+            <div class="h">Dati del richiedente</div>
+            <div class="alert">Sono presenti errori nel modulo (1).</div>
+            <div class="fields">
+              <div class="f"><div class="l">Nome *</div><div class="i">Luca</div><div class="e"></div></div>
+              <div class="f"><div class="l">Cognome *</div><div class="i">Rossi</div><div class="e"></div></div>
+              <div class="f bad"><div class="l">Codice fiscale *</div><div class="i">RSS LCU 96R05 H501X</div><div class="e">Valore non conforme (ERR_CF_016)</div></div>
+              <div class="f"><div class="l">Telefono</div><div class="i"></div><div class="e"></div></div>
+            </div>
+            <div class="tvb">
+              <div class="t"><span class="gt">&gt;</span>Ti do una mano?</div>
+              <div class="tx">Il campo «Codice fiscale» non è ancora giusto. Il codice fiscale ha 16 caratteri, lettere e numeri. Lo trovi sulla tessera sanitaria: copialo senza spazi.</div>
+              <div class="acts"><span class="pri">Mostrami dove</span><span>Mi è servito</span><span>Non ora</span></div>
+            </div>
+            <div class="btns"><span>Indietro</span><span class="pri">Avanti</span></div>
+          </div>
+        </div>
+        <p class="cap">Compare in <b>0,2 secondi</b>, accanto al punto del blocco. Il testo sotto scende, <b>non viene coperto</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Segnali -->
+  <section class="slide" data-title="I segnali">
+    <span class="eyebrow r">Percepisce</span>
+    <h2 class="r" style="--d:1">7 segnali di blocco.<br><span class="grad">Quelli chiari, al primo colpo.</span></h2>
+    <div class="sig">
+      <div class="card r" style="--d:2"><span class="when">Subito</span><h3>Pulsante disattivato</h3><p>Un clic su qualcosa che non risponde: spiega cosa lo attiva.</p></div>
+      <div class="card r" style="--d:2"><span class="when">Subito</span><h3>Errore su un campo</h3><p>Traduce il messaggio del sito e spiega il formato.</p></div>
+      <div class="card r" style="--d:3"><span class="when">Dopo 5 s altrove</span><h3>Rientro</h3><p>"Eccoti di nuovo! Eri a «Dati del richiedente»."</p></div>
+      <div class="card r" style="--d:3"><span class="when">Dopo 12 s fermo</span><h3>Inattività</h3><p>Con il modulo a metà: indica il prossimo campo.</p></div>
+      <div class="card r" style="--d:4"><span class="when">3 clic in 2 s</span><h3>Raffica di clic</h3><p>Invita ad aspettare: la pagina può essere al lavoro.</p></div>
+      <div class="card r" style="--d:4"><span class="when">2 ritorni in 1 min</span><h3>Avanti e indietro</h3><p>Lo ferma sulla pagina attuale e dice cosa manca.</p></div>
+      <div class="card r" style="--d:5"><span class="when">2 volte in 30 s</span><h3>Esitazione</h3><p>Apre un campo senza scrivere: spiega cosa va inserito.</p></div>
+      <div class="card hot r" style="--d:5"><span class="when">Sempre</span><h3>Non ti assilla</h3><p>Uno alla volta. "Non ora" alza la soglia ×1,5. I clic nei campi di testo non contano.</p></div>
+    </div>
+  </section>
+
+  <!-- 9 · Architettura -->
+  <section class="slide" data-title="Architettura agentica">
+    <span class="eyebrow r">Struttura agentica</span>
+    <h2 class="r" style="--d:1">Un agente AI. <span class="grad">Il codice lo controlla.</span></h2>
+    <div class="arch r" style="--d:2">
+      <svg viewBox="0 0 1620 610" preserveAspectRatio="none">
+        <path d="M400 110 L610 110" />
+        <path d="M1010 110 L1220 110" />
+        <path d="M200 236 L200 360" />
+        <path d="M400 470 L610 470" />
+        <path d="M1010 470 L1220 470" />
+        <path d="M1420 360 L1420 236" />
+      </svg>
+      <div class="node code" style="left:0; top:20px"><span class="k">Codice · estensione</span><b>Detector</b><span>7 segnali di blocco, soglie per sensibilità.</span></div>
+      <div class="node code" style="left:610px; top:20px"><span class="k">Codice · estensione</span><b>Regole</b><span>Un suggerimento subito, anche senza rete.</span></div>
+      <div class="node ui" style="left:1220px; top:20px"><span class="k">Interfaccia</span><b>Scheda in pagina</b><span>Testo AI solo se Luca non ha ancora agito.</span></div>
+      <div class="node code" style="left:0; top:360px"><span class="k">Codice · estensione</span><b>Contesto</b><span>Dove sei fermo. Mai i valori, dati mascherati.</span></div>
+      <div class="node ai" style="left:610px; top:360px"><span class="k">Agente AI</span><b>Hint agent</b><span>Claude Opus 5.5, effort basso, JSON vincolato da schema.</span></div>
+      <div class="node code" style="left:1220px; top:360px"><span class="k">Codice · server</span><b>Validatore</b><span>Ogni nome tra «» deve esistere nella pagina.</span></div>
+    </div>
+    <p class="r" style="--d:5; font-size:46px; font-weight:700; margin-top:34px">L'AI scrive. <span class="grad">Il codice controlla. Le regole garantiscono.</span></p>
+  </section>
+
+  <!-- 10 · Il controllo -->
+  <section class="slide" data-title="Il controllo">
+    <span class="eyebrow r">Semplificare senza tradire</span>
+    <h2 class="r" style="--d:1">Se l'AI nomina un pulsante che non c'è,<br><span class="grad">a Luca non arriva.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Hint agent</span><h3>Scrive</h3><div class="mono">“Premi <span class="x">«Invia domanda»</span> per continuare.”</div></div>
+      <div class="step bad frag"><span class="n">2 · Validatore</span><h3><span class="x">✗</span> Scarta</h3><div class="mono">«Invia domanda» non compare nella pagina.</div></div>
+      <div class="step frag"><span class="n">3 · Regole</span><h3>Restano</h3><p>Luca ha già davanti il suggerimento a regole, verificato. <b>Nessuna attesa.</b></p></div>
+      <div class="step good frag"><span class="n">4 · Luca</span><h3><span class="v">✓</span> Legge</h3><p>Solo nomi che può ritrovare. Il testo originale è in «Perché me lo dici?».</p></div>
+    </div>
+    <p class="lead r" style="--d:5; margin-top:60px">Anche il <b>"perché"</b> passa dagli stessi controlli. E la chiave AI resta sul server, che accetta richieste solo da questo computer.</p>
+  </section>
+
+  <!-- 11 · Fiducia -->
+  <section class="slide" data-title="Fiducia">
+    <span class="eyebrow r">Fiducia</span>
+    <h2 class="r" style="--d:1">Vede dove sei fermo.<br><span class="grad">Non cosa scrivi.</span></h2>
+    <div class="grid3 cols3" style="margin-top:56px">
+      <div class="card r" style="--d:2"><h3>Privacy</h3><ul>
+        <li>Mai il valore dei campi: solo se sono compilati</li>
+        <li>Email, codice fiscale e numeri mascherati</li>
+        <li>Attivo solo sui siti della PA, non su banca e webmail</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Fedeltà</h3><ul>
+        <li>Il sito non viene riscritto: il suggerimento si aggiunge</li>
+        <li>Nomi tra «» verificati sulla pagina</li>
+        <li>Nessun consiglio legale o amministrativo</li>
+      </ul></div>
+      <div class="card hot r" style="--d:4"><h3>Rispetto</h3><ul>
+        <li>Non ruba il focus, non apre finestre modali</li>
+        <li>Non nomina diagnosi o difficoltà</li>
+        <li>Linguaggio neutro: "Eccoti di nuovo", non "Bentornato"</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 12 · Pensato per Luca -->
+  <section class="slide" data-title="Pensato per Luca">
+    <span class="eyebrow r">Pensato per Luca</span>
+    <h2 class="r" style="--d:1">Una cosa sola, <span class="grad">nel punto giusto.</span></h2>
+    <div class="feat">
+      <div class="card r" style="--d:2"><div class="ic">1</div><h3>Un'azione</h3><p>Mai elenchi di passi. Al massimo circa 30 parole, frasi brevi, si dà del tu.</p></div>
+      <div class="card r" style="--d:3"><div class="ic">&gt;</div><h3>Mostrami dove</h3><p>Evidenzia l'elemento, lo porta al centro dello schermo e ci sposta il focus.</p></div>
+      <div class="card r" style="--d:4"><div class="ic">?</div><h3>Perché me lo dici?</h3><p>Cosa abbiamo notato, e il testo originale della pagina a cui ci riferiamo.</p></div>
+      <div class="card r" style="--d:5"><div class="ic">±</div><h3>Quanto spesso</h3><p>Di rado, normale, spesso. Oppure una pausa di 10 minuti. Decide Luca.</p></div>
+      <div class="card r" style="--d:6"><div class="ic">⌨</div><h3>Tastiera e lettori</h3><p>Annunciato agli screen reader, si usa con Tab e Invio, Esc chiude.</p></div>
+      <div class="card r" style="--d:7"><div class="ic">↺</div><h3>Si chiude da sé</h3><p>Se viene ignorata, dopo un minuto sparisce. A ogni nuova pagina riparte da zero.</p></div>
+    </div>
+  </section>
+
+  <!-- 13 · Come l'abbiamo costruito -->
+  <section class="slide" data-title="Come l'abbiamo costruito">
+    <span class="eyebrow r">Come l'abbiamo costruito</span>
+    <h2 class="r" style="--d:1">Agentic coding, con revisione umana.</h2>
+    <div class="grid2" style="margin-top:50px; grid-template-columns: .78fr 1.22fr; align-items:start">
+      <div class="card r" style="--d:2; padding:36px 40px"><div class="tree"><span class="h">agents/</span>
+├─ CLAUDE.md
+├─ workflow.md
+├─ <span class="h">prompts/</span>  <span class="c"># letto dal server</span>
+│  └─ hint-agent.md
+├─ <span class="h">subagents/</span>
+│  ├─ struggle-signal-designer
+│  ├─ hint-copy-reviewer
+│  └─ a11y-persona-tester
+├─ <span class="h">commands/</span>
+│  ├─ /demo-check
+│  ├─ /new-signal
+│  └─ /review-hints
+└─ <span class="h">skills/</span>plain-italian-hints</div></div>
+      <div class="card r" style="--d:3; padding:36px 40px">
+        <table class="rev">
+          <thead><tr><th>Area</th><th>AI</th><th>Revisione umana</th></tr></thead>
+          <tbody>
+            <tr><td>Idea</td><td>3 agenti di ricerca in parallelo, 21 idee</td><td>Scelta di idea, persona e servizio</td></tr>
+            <tr><td>Codice</td><td>Claude Code, 38 test, verifica nel browser</td><td>Lettura del codice, prova in Chrome</td></tr>
+            <tr><td>Revisione</td><td>2 subagenti: 24 note sui testi, 15 problemi nel codice</td><td>Correzioni approvate e riverificate</td></tr>
+            <tr><td>Testi</td><td>Skill plain-italian-hints</td><td>Riletti pensando a Luca</td></tr>
+            <tr><td>UX</td><td>Scheda in pagina, tempi più rapidi</td><td>Richiesta del team dopo la prima prova</td></tr>
+            <tr><td>Soglie</td><td>Valori iniziali ragionati</td><td>Da tarare con utenti reali</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 · Demo -->
+  <section class="slide" data-title="Demo">
+    <div class="glow" style="left:30%; top:-700px"></div>
+    <span class="eyebrow r">Demo live</span>
+    <h2 class="r" style="--d:1">Il percorso di Luca.</h2>
+    <ol class="demo" style="padding:0">
+      <li class="r" style="--d:2"><div>Senza assistente<span>Gli stessi 4 ostacoli, nessun aiuto</span></div></li>
+      <li class="r" style="--d:3"><div>Si distrae<span>Cambia scheda e torna: "Eccoti di nuovo! Eri a…"</span></div></li>
+      <li class="r" style="--d:4"><div>Codice fiscale con spazi<span>Al primo errore: 16 caratteri, senza spazi</span></div></li>
+      <li class="r" style="--d:5"><div>Calendario grigio<span>Un clic: "Premi «Mese successivo»"</span></div></li>
+      <li class="r" style="--d:6"><div>Conferma disattivata<span>"Si attiva solo dopo che spunti la casella…"</span></div></li>
+      <li class="r" style="--d:7"><div>Prenotazione confermata<span>Le metriche confrontano le due prove</span></div></li>
+    </ol>
+    <div class="spacer"></div>
+    <p class="r" style="--d:8"><span class="url">localhost:8787/demo/?assistente=0</span> <span class="muted" style="font-size:26px">→</span> <span class="url">?assistente=1</span></p>
+  </section>
+
+  <!-- 15 · Autonomia e limiti -->
+  <section class="slide" data-title="Autonomia e limiti">
+    <span class="eyebrow r">Autonomia &amp; limiti</span>
+    <h2 class="r" style="--d:1">Cosa guadagna Luca.<br><span class="grad">E cosa non sappiamo ancora.</span></h2>
+    <div class="grid3 cols3" style="margin-top:50px">
+      <div class="card hot r" style="--d:2"><h3>Autonomia</h3><ul>
+        <li>Arriva alla prenotazione senza chiedere aiuto</li>
+        <li>Dopo una distrazione riparte dal punto giusto</li>
+        <li>Capisce perché il sito "non risponde"</li>
+        <li>Decide lui quanto spesso essere aiutato</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Cosa non cambia</h3><ul>
+        <li>Testi e regole del sito</li>
+        <li>Le decisioni: indica dove agire, non agisce al posto suo</li>
+        <li>Il controllo: si spegne con un clic</li>
+      </ul></div>
+      <div class="card r" style="--d:4"><h3>Limiti di oggi</h3><ul class="no">
+        <li>Soglie da tarare con persone reali</li>
+        <li>Possibili falsi allarmi</li>
+        <li>Solo Chrome desktop e siti in elenco</li>
+        <li>Etichette e testi della pagina vanno all'AI; i nomi propri non sono mascherati</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 16 · Prossimi passi -->
+  <section class="slide" data-title="Prossimi passi">
+    <span class="eyebrow r">Prossimi passi</span>
+    <h2 class="r" style="--d:1">Da prototipo a compagno quotidiano.</h2>
+    <div class="feat">
+      <div class="card r" style="--d:2"><div class="ic">&gt;</div><h3>Prove con persone</h3><p>Con persone con ADHD e associazioni, per tarare soglie e testi.</p></div>
+      <div class="card r" style="--d:3"><div class="ic">&gt;</div><h3>Profili pronti</h3><p>Impostazioni per persone anziane, con dislessia o con poca esperienza del digitale.</p></div>
+      <div class="card r" style="--d:4"><div class="ic">&gt;</div><h3>Voce</h3><p>Suggerimento letto ad alta voce, risposta a voce.</p></div>
+      <div class="card r" style="--d:5"><div class="ic">&gt;</div><h3>Modello locale</h3><p>Un modello sul dispositivo: nessun testo della pagina esce dal computer.</p></div>
+      <div class="card r" style="--d:6"><div class="ic">&gt;</div><h3>Più siti</h3><p>Comuni, ASL, scuole: basta aggiungerli all'elenco dei siti dell'estensione.</p></div>
+      <div class="card r" style="--d:7"><div class="ic">&gt;</div><h3>Altri browser</h3><p>Edge e Firefox, e poi lo smartphone.</p></div>
+    </div>
+  </section>
+
+  <!-- 17 · Chiusura -->
+  <section class="slide closing" data-title="Chiusura">
+    <div class="glow" style="left:-300px; bottom:-700px"></div>
+    <div class="bigmark" style="opacity:.8">&gt;</div>
+    <div class="spacer"></div>
+    <h2 class="r" style="--d:1">Luca arriva in fondo.<br>Da solo.</h2>
+    <h2 class="r" style="--d:3; margin-top:10px"><span class="grad">E il sito resta quello che è.</span></h2>
+    <p class="lead r" style="--d:5; margin-top:60px">Ti vedo bloccato<span class="gt">&gt;</span> · github.com/milmirk/ti-vedo-bloccato</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span>Grazie</span></div>
+  </section>
+
+</div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const hud = document.getElementById('hud');
+  let i = 0;
+
+  const fit = () => {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  };
+
+  const frags = (s) => [...s.querySelectorAll('.frag')];
+
+  const show = (n, fromBack = false) => {
+    i = Math.max(0, Math.min(n, slides.length - 1));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    frags(slides[i]).forEach((f) => f.classList.toggle('on', fromBack));
+    bar.style.width = `${((i + 1) / slides.length) * 100}%`;
+    hud.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    history.replaceState(null, '', `#${i + 1}`);
+  };
+
+  const help = document.querySelector('.help');
+  const hideHelp = () => help.classList.add('gone');
+  setTimeout(hideHelp, 6000);
+
+  const next = () => {
+    hideHelp();
+    const hidden = frags(slides[i]).find((f) => !f.classList.contains('on'));
+    if (hidden) { hidden.classList.add('on'); return; }
+    if (i < slides.length - 1) show(i + 1);
+  };
+
+  const prev = () => {
+    const shown = frags(slides[i]).filter((f) => f.classList.contains('on'));
+    if (shown.length) { shown[shown.length - 1].classList.remove('on'); return; }
+    if (i > 0) show(i - 1, true);
+  };
+
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1, true);
+    else if (e.key.toLowerCase() === 'f') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
+    }
+  });
+  addEventListener('click', (e) => { if (e.clientX > innerWidth * 0.25) next(); else prev(); });
+  let x0 = null;
+  addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+    x0 = null;
+  });
+  addEventListener('resize', fit);
+
+  fit();
+  const start = parseInt(location.hash.slice(1), 10);
+  show(Number.isFinite(start) ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>

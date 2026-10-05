@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Ti vedo bloccato",
+  "version": "0.1.0",
+  "description": "Si accorge quando sei bloccato su un sito e ti dà un solo suggerimento, nel punto giusto.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:8787/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Ti vedo bloccato",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://*.gov.it/*",
+        "https://*.inps.it/*",
+        "https://*.pagopa.it/*"
+      ],
+      "js": [
+        "content/detector.js",
+        "content/context.js",
+        "content/fallback-hints.js",
+        "content/companion.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
