@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Rata o non rata: tutte le tue rate, da servizi diversi, in un calendario solo. Strumento educativo, senza consigli." />
+<title>Rata o non rata · tutte le rate in un calendario solo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Ctext x='9' y='24' font-size='22' font-weight='800' fill='%23A100FF' font-family='Arial'%3E%3E%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="style.css" />
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+
+<header class="top">
+  <div class="top-in">
+    <p class="brand"><span class="mark" aria-hidden="true">&gt;</span> Rata o non rata</p>
+    <p class="tagline">Tutte le tue rate, da servizi diversi, in un calendario solo.</p>
+  </div>
+</header>
+
+<nav class="tabs-wrap" aria-label="Sezioni dell'app">
+  <div class="tabs" role="tablist" aria-label="Sezioni">
+    <button type="button" role="tab" id="tab-email" aria-controls="panel-email" aria-selected="true"><span class="tn" aria-hidden="true">1</span> Le email</button>
+    <button type="button" role="tab" id="tab-cal" aria-controls="panel-cal" aria-selected="false" tabindex="-1"><span class="tn" aria-hidden="true">2</span> Calendario</button>
+    <button type="button" role="tab" id="tab-sim" aria-controls="panel-sim" aria-selected="false" tabindex="-1"><span class="tn" aria-hidden="true">3</span> E se…?</button>
+    <button type="button" role="tab" id="tab-learn" aria-controls="panel-learn" aria-selected="false" tabindex="-1"><span class="tn" aria-hidden="true">4</span> Impara</button>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+
+  <!-- 1 · Le email -->
+  <section class="panel" role="tabpanel" id="panel-email" aria-labelledby="tab-email">
+    <div class="intro card">
+      <h1>Quanto paghi di rate il mese prossimo?</h1>
+      <p>Ogni app ti mostra solo le sue rate. Qui le metti insieme: incolla le email di conferma degli acquisti a rate e le leggiamo per te, riga per riga. I dati restano in questo browser.</p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="load-samples">Carica le 7 email di esempio</button>
+        <button type="button" class="btn" id="load-unknown">Prova un'email in un formato sconosciuto</button>
+      </div>
+      <p class="hint">Gli esempi sono di Chiara, 22 anni, primo lavoro part-time. Servizi e negozi sono inventati.</p>
+    </div>
+
+    <div class="card">
+      <h2 id="paste-title">Incolla le tue email</h2>
+      <form id="paste-form" aria-labelledby="paste-title" novalidate>
+        <label for="paste-text">Testo di una o più email di conferma</label>
+        <p class="hint" id="paste-help">Puoi incollarne più di una: ogni email inizia con «Da:» oppure separala con una riga di trattini (---).</p>
+        <textarea id="paste-text" rows="8" aria-describedby="paste-help" spellcheck="false"></textarea>
+        <div class="actions">
+          <button type="submit" class="btn primary">Leggi le email</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="read-results" class="results"></div>
+
+    <details class="card" id="manual-box">
+      <summary><h2>Aggiungi a mano</h2><span class="hint">Per un acquisto senza email, o per correggere un valore.</span></summary>
+      <form id="manual-form" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="m-provider">Servizio</label>
+            <input id="m-provider" name="provider" list="known-providers" autocomplete="off" aria-describedby="m-provider-err" />
+            <datalist id="known-providers"></datalist>
+            <p class="err" id="m-provider-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-merchant">Negozio o acquisto</label>
+            <input id="m-merchant" name="merchant" autocomplete="off" aria-describedby="m-merchant-err" />
+            <p class="err" id="m-merchant-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-total">Totale da pagare (€)</label>
+            <input id="m-total" name="total" inputmode="decimal" autocomplete="off" placeholder="es. 89,90" aria-describedby="m-total-err" required />
+            <p class="err" id="m-total-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-count">Numero di rate</label>
+            <input id="m-count" name="count" type="number" min="1" max="60" step="1" inputmode="numeric" aria-describedby="m-count-err" required />
+            <p class="err" id="m-count-err"></p>
+          </div>
+          <div class="field">
+            <label for="m-frequency">Ogni quanto</label>
+            <select id="m-frequency" name="frequency">
+              <option value="mensile">ogni mese</option>
+              <option value="ogni_2_settimane">ogni 2 settimane</option>
+              <option value="ogni_30_giorni">ogni 30 giorni</option>
+              <option value="settimanale">ogni settimana</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="m-first">Data della prima rata</label>
+            <input id="m-first" name="firstDate" type="date" aria-describedby="m-first-err" required />
+            <p class="err" id="m-first-err"></p>
+          </div>
+          <div class="field wide">
+            <label for="m-rata">Importo della rata, se lo conosci (€)</label>
+            <input id="m-rata" name="installmentAmount" inputmode="decimal" autocomplete="off" aria-describedby="m-rata-help m-rata-err" />
+            <p class="hint" id="m-rata-help">Se lo lasci vuoto, il totale viene diviso in parti uguali e l'ultima rata porta i centesimi che avanzano.</p>
+            <p class="err" id="m-rata-err"></p>
+          </div>
+        </div>
+        <input type="hidden" id="m-replace" />
+        <div class="actions">
+          <button type="submit" class="btn primary" id="m-submit">Aggiungi al calendario</button>
+          <button type="reset" class="btn">Svuota il modulo</button>
+        </div>
+      </form>
+    </details>
+  </section>
+
+  <!-- 2 · Calendario -->
+  <section class="panel" role="tabpanel" id="panel-cal" aria-labelledby="tab-cal" hidden>
+    <div id="cal-empty" class="card empty">
+      <h2>Il calendario è vuoto</h2>
+      <p>Carica le email di esempio o incolla le tue nella sezione «Le email».</p>
+      <button type="button" class="btn primary" data-goto="tab-email">Vai alle email</button>
+    </div>
+
+    <div id="cal-content" hidden>
+      <article class="hero" aria-labelledby="hero-title">
+        <h2 id="hero-title">Il mese prossimo paghi</h2>
+        <p class="big" id="hero-amount"></p>
+        <p class="hero-sub" id="hero-sub"></p>
+        <ul class="hero-list" id="hero-list"></ul>
+        <p class="hero-foot" id="hero-foot"></p>
+      </article>
+
+      <div class="card" id="income-card">
+        <h2>Quello che entra e il tuo avviso</h2>
+        <p class="hint">Facoltativo. Serve solo a vedere che parte delle tue entrate va in rate. L'app non suggerisce nessuna soglia: scegli tu se e quando avere un avviso.</p>
+        <div class="grid">
+          <div class="field">
+            <label for="income">Quanto ti entra in un mese (€)</label>
+            <input id="income" inputmode="decimal" autocomplete="off" placeholder="es. 720" aria-describedby="income-err" />
+            <p class="err" id="income-err"></p>
+          </div>
+          <fieldset class="field threshold">
+            <legend>Avvisami quando le rate superano</legend>
+            <div class="chips" id="thr-chips">
+              <label class="chip"><input type="radio" name="thr" value="" checked /> <span>Nessun avviso</span></label>
+              <label class="chip"><input type="radio" name="thr" value="10" /> <span>10%</span></label>
+              <label class="chip"><input type="radio" name="thr" value="20" /> <span>20%</span></label>
+              <label class="chip"><input type="radio" name="thr" value="30" /> <span>30%</span></label>
+              <label class="chip"><input type="radio" name="thr" value="custom" /> <span>Altro</span></label>
+            </div>
+            <div class="custom-thr" id="custom-thr" hidden>
+              <label for="thr-custom">La tua soglia (%)</label>
+              <input id="thr-custom" type="number" min="1" max="100" step="1" inputmode="numeric" />
+            </div>
+          </fieldset>
+        </div>
+        <details class="overrides" id="overrides">
+          <summary>Le entrate cambiano da mese a mese?</summary>
+          <p class="hint">Scrivi solo i mesi diversi dal solito. Gli altri usano la cifra indicata sopra.</p>
+          <div class="ov-grid" id="ov-grid"></div>
+        </details>
+        <div id="notes" class="notes" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2 id="chart-title">Mese per mese</h2>
+          <p class="hint">Ogni colore è un servizio. Passa sopra una colonna per il dettaglio, o apri la tabella.</p>
+        </div>
+        <div id="chart" class="chart"></div>
+      </div>
+
+      <div class="card">
+        <h2>Prossimi 30 giorni</h2>
+        <div id="upcoming"></div>
+      </div>
+
+      <div class="card">
+        <h2>I tuoi acquisti a rate</h2>
+        <p class="hint">Apri un acquisto per vedere ogni valore accanto alla frase dell'email da cui viene.</p>
+        <div id="purchases"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · E se…? -->
+  <section class="panel" role="tabpanel" id="panel-sim" aria-labelledby="tab-sim" hidden>
+    <div class="card">
+      <h1 class="h2">E se aggiungo questo acquisto?</h1>
+      <p>Prova a vedere cosa cambierebbe nel calendario con un nuovo acquisto a rate. È solo una simulazione: non viene salvata tra i tuoi acquisti.</p>
+      <form id="sim-form" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="s-total">Importo totale (€)</label>
+            <input id="s-total" inputmode="decimal" autocomplete="off" placeholder="es. 120" aria-describedby="s-total-err" required />
+            <p class="err" id="s-total-err"></p>
+          </div>
+          <div class="field">
+            <label for="s-count">Numero di rate</label>
+            <input id="s-count" type="number" min="1" max="60" step="1" value="3" inputmode="numeric" aria-describedby="s-count-err" required />
+            <p class="err" id="s-count-err"></p>
+          </div>
+          <div class="field">
+            <label for="s-frequency">Ogni quanto</label>
+            <select id="s-frequency">
+              <option value="mensile">ogni mese</option>
+              <option value="ogni_2_settimane">ogni 2 settimane</option>
+              <option value="ogni_30_giorni">ogni 30 giorni</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="s-first">Prima rata</label>
+            <input id="s-first" type="date" aria-describedby="s-first-err" required />
+            <p class="err" id="s-first-err"></p>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn primary">Mostra nel calendario</button>
+          <button type="button" class="btn" id="sim-clear">Togli la simulazione</button>
+        </div>
+      </form>
+    </div>
+    <div id="sim-result"></div>
+  </section>
+
+  <!-- 4 · Impara -->
+  <section class="panel" role="tabpanel" id="panel-learn" aria-labelledby="tab-learn" hidden>
+    <div class="card">
+      <h1 class="h2">Le parole delle rate</h1>
+      <p class="hint">Definizioni brevi, con un esempio preso dal tuo calendario.</p>
+      <dl class="glossary" id="glossary"></dl>
+    </div>
+    <div class="card">
+      <h2>Quiz sul tuo calendario</h2>
+      <p>Tre domande. La prima volta prova a rispondere a memoria, prima di guardare il calendario; poi rifallo dopo averlo visto e confronta i punteggi.</p>
+      <div id="quiz"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p><b>Strumento educativo.</b> Mostra fatti presi dalle tue email e fa somme. Non dà consigli finanziari e non dice cosa comprare.</p>
+  <p>I dati restano in questo browser. <span id="today-label"></span></p>
+  <p><button type="button" class="btn small" id="reset-all">Cancella tutti i dati</button> <a href="/presentation/">Presentazione</a></p>
+</footer>
+
+<div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="tooltip" class="tooltip" role="presentation" hidden></div>
+</body>
+</html>

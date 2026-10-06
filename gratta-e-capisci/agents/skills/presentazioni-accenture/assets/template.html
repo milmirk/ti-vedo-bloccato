@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Presentazione — Template Accenture</title>
+<style>
+  :root{
+    --purple:#A100FF;
+    --purple-dark:#7500C0;
+    --purple-darker:#460073;
+    --purple-light:#BE82FF;
+    --purple-pastel:#DCAFFF;
+    --purple-pink:#B455AA;
+    --black:#000000;
+    --white:#FFFFFF;
+    --grey:#96968C;
+    --grey-light:#E6E6DC;
+    --font:"Graphik", Arial, Helvetica, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:#1b1b1b; font-family:var(--font); overflow:hidden;
+  }
+  #viewport{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+  }
+  #deck{
+    position:relative; width:1280px; height:720px;
+    transform-origin:center center;
+    box-shadow:0 0 60px rgba(0,0,0,.5);
+  }
+  .slide{
+    position:absolute; inset:0; width:1280px; height:720px;
+    display:none; flex-direction:column;
+    background:var(--white); color:var(--black);
+    padding:56px 72px 40px 72px;
+  }
+  .slide.active{ display:flex; }
+
+  /* ---------- varianti di sfondo ---------- */
+  .bg-dark{ background:var(--purple-darker); color:var(--white); }
+  .bg-purple{ background:var(--purple-dark); color:var(--white); }
+  .bg-light-grey{ background:var(--grey-light); color:var(--black); }
+
+  /* ---------- tipografia ---------- */
+  h1{ font-size:48px; font-weight:700; margin:0 0 8px 0; line-height:1.1; }
+  h2{ font-size:34px; font-weight:700; margin:0 0 24px 0; line-height:1.15; }
+  h2 .accent{ color:var(--purple); }
+  .bg-dark h2, .bg-purple h2{ color:var(--white); }
+  .subtitle{ font-size:22px; font-weight:400; color:var(--grey); margin:0 0 28px 0; }
+  .bg-dark .subtitle, .bg-purple .subtitle{ color:var(--purple-pastel); }
+  p, li{ font-size:18px; line-height:1.5; }
+  .kicker{
+    display:inline-block; font-size:14px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--purple); margin-bottom:14px;
+  }
+  .bg-dark .kicker, .bg-purple .kicker{ color:var(--purple-light); }
+
+  /* ---------- footer comune a ogni slide ---------- */
+  .footer{
+    position:absolute; left:72px; right:72px; bottom:18px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color:var(--grey);
+  }
+  .bg-dark .footer, .bg-purple .footer{ color:var(--purple-pastel); }
+  .wordmark{ font-weight:700; letter-spacing:.01em; }
+  .wordmark .chevron{ color:var(--purple); font-weight:700; }
+  .bg-dark .wordmark .chevron, .bg-purple .wordmark .chevron{ color:var(--purple-light); }
+
+  .content{ flex:1; display:flex; flex-direction:column; min-height:0; }
+
+  /* ---------- slide 1: copertina ---------- */
+  .cover{ justify-content:center; align-items:flex-start; }
+  .cover .wordmark-big{ font-size:26px; font-weight:700; margin-bottom:40px; }
+  .cover h1{ font-size:56px; max-width:950px; }
+  .cover .subtitle{ font-size:24px; max-width:850px; }
+  .cover .meta{ margin-top:auto; font-size:16px; color:var(--purple-pastel); }
+
+  /* ---------- slide 2: divisore di sezione ---------- */
+  .divider{ justify-content:center; align-items:flex-start; }
+  .divider .num{ font-size:120px; font-weight:700; color:var(--purple-light); line-height:1; margin-bottom:12px; }
+  .divider h1{ font-size:48px; max-width:900px; }
+
+  /* ---------- slide 4: due colonne ---------- */
+  .columns{ display:flex; gap:48px; flex:1; min-height:0; }
+  .col{ flex:1; min-width:0; }
+  .col h3{ font-size:20px; font-weight:700; color:var(--purple); margin:0 0 12px 0; }
+
+  /* ---------- slide 5: KPI ---------- */
+  .kpi-row{ display:flex; gap:32px; flex:1; align-items:center; }
+  .kpi{ flex:1; text-align:center; padding:28px 16px; background:var(--grey-light); border-radius:4px; }
+  .kpi .value{ font-size:64px; font-weight:700; color:var(--purple); line-height:1; }
+  .kpi .label{ font-size:16px; color:var(--grey); margin-top:10px; }
+
+  /* ---------- slide 6: prima/dopo ---------- */
+  .before-after{ display:flex; gap:24px; flex:1; min-height:0; }
+  .ba-panel{ flex:1; border-radius:4px; padding:28px; display:flex; flex-direction:column; }
+  .ba-before{ background:var(--grey-light); }
+  .ba-after{ background:var(--purple-darker); color:var(--white); }
+  .ba-tag{ font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px; }
+  .ba-before .ba-tag{ color:var(--grey); }
+  .ba-after .ba-tag{ color:var(--purple-light); }
+
+  /* ---------- slide 7: diagramma a blocchi/flusso ---------- */
+  .flow{ flex:1; display:flex; align-items:center; justify-content:center; gap:0; }
+  .flow-box{
+    background:var(--grey-light); border:2px solid var(--purple);
+    border-radius:6px; padding:18px 20px; font-size:16px; font-weight:600;
+    text-align:center; width:190px;
+  }
+  .flow-box.highlight{ background:var(--purple); color:var(--white); border-color:var(--purple-darker); }
+  .flow-arrow{ width:48px; height:2px; background:var(--purple); position:relative; margin:0 6px; }
+  .flow-arrow::after{
+    content:""; position:absolute; right:-1px; top:-5px;
+    border:6px solid transparent; border-left-color:var(--purple);
+  }
+
+  /* ---------- slide 8: demo/screenshot ---------- */
+  .demo-frame{
+    flex:1; border:2px solid var(--grey-light); border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--grey-light); overflow:hidden; position:relative;
+  }
+  .demo-frame iframe, .demo-frame img{ width:100%; height:100%; border:0; object-fit:contain; background:var(--white); }
+  .demo-placeholder{ color:var(--grey); font-size:18px; text-align:center; }
+  .demo-caption{ margin-top:14px; font-size:15px; color:var(--grey); }
+
+  /* ---------- slide 9: chiusura ---------- */
+  .closing{ justify-content:center; align-items:flex-start; }
+  .closing h1{ font-size:52px; }
+  .closing .contacts{ margin-top:32px; font-size:18px; color:var(--purple-pastel); }
+
+  ul.bullets{ list-style:none; margin:0; padding:0; }
+  ul.bullets li{ position:relative; padding-left:26px; margin-bottom:14px; }
+  ul.bullets li::before{
+    content:""; position:absolute; left:0; top:9px; width:10px; height:10px;
+    background:var(--purple); border-radius:50%;
+  }
+
+  /* ---------- controlli di navigazione (nascosti in stampa) ---------- */
+  #nav-ui{
+    position:fixed; left:0; right:0; bottom:10px; display:flex;
+    justify-content:center; gap:14px; align-items:center; z-index:10;
+    font-family:var(--font); color:#fff; font-size:13px; user-select:none;
+  }
+  #nav-ui button{
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3);
+    color:#fff; border-radius:4px; padding:6px 14px; cursor:pointer; font-size:14px;
+  }
+  #nav-ui button:hover{ background:rgba(161,0,255,.5); }
+  #counter{ min-width:70px; text-align:center; }
+  .nav-hit{ position:absolute; top:0; bottom:0; width:30%; cursor:pointer; z-index:5; }
+  .nav-hit.left{ left:0; }
+  .nav-hit.right{ right:0; }
+
+  /* ---------- stampa / PDF: una slide per pagina ---------- */
+  @media print{
+    html,body{ overflow:visible; background:#fff; }
+    #nav-ui, .nav-hit{ display:none !important; }
+    #viewport{ position:static; display:block; }
+    #deck{ transform:none !important; width:auto; height:auto; box-shadow:none; }
+    .slide{
+      display:flex !important; position:relative; width:1280px; height:720px;
+      page-break-after:always; break-after:page;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="deck">
+
+    <!-- SLIDE: copertina -->
+    <section class="slide cover">
+      <div class="content cover">
+        <div class="wordmark-big">accenture<span style="color:var(--purple-light)">&gt;</span></div>
+        <div class="kicker">Hackathon · Nome progetto</div>
+        <h1>Titolo della soluzione</h1>
+        <p class="subtitle">Sottotitolo in una riga: cosa fa e per chi</p>
+        <div class="meta">Team · Data</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: divisore di sezione -->
+    <section class="slide divider bg-purple">
+      <div class="content divider">
+        <div class="num">01</div>
+        <h1>Titolo di sezione</h1>
+        <p class="subtitle">Breve descrizione di cosa segue in questa parte</p>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: titolo + bullet -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Contesto</div>
+        <h2>Titolo <span class="accent">con accento</span></h2>
+        <ul class="bullets">
+          <li>Primo punto chiave, frase breve</li>
+          <li>Secondo punto chiave, frase breve</li>
+          <li>Terzo punto chiave, frase breve</li>
+          <li>Quarto punto chiave, frase breve</li>
+        </ul>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: due colonne -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Confronto</div>
+        <h2>Titolo a due colonne</h2>
+        <div class="columns">
+          <div class="col">
+            <h3>Colonna A</h3>
+            <ul class="bullets">
+              <li>Punto 1</li>
+              <li>Punto 2</li>
+              <li>Punto 3</li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Colonna B</h3>
+            <ul class="bullets">
+              <li>Punto 1</li>
+              <li>Punto 2</li>
+              <li>Punto 3</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: KPI / metriche -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Risultati</div>
+        <h2>I numeri della soluzione</h2>
+        <div class="kpi-row">
+          <div class="kpi"><div class="value">-40%</div><div class="label">Tempo di processo</div></div>
+          <div class="kpi"><div class="value">3x</div><div class="label">Velocità di delivery</div></div>
+          <div class="kpi"><div class="value">99%</div><div class="label">Accuratezza</div></div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: prima/dopo -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Impatto</div>
+        <h2>Prima e dopo</h2>
+        <div class="before-after">
+          <div class="ba-panel ba-before">
+            <div class="ba-tag">Prima</div>
+            <ul class="bullets"><li>Processo manuale</li><li>Tempi lunghi</li><li>Errori frequenti</li></ul>
+          </div>
+          <div class="ba-panel ba-after">
+            <div class="ba-tag">Dopo</div>
+            <ul class="bullets"><li>Processo automatizzato</li><li>Tempi ridotti</li><li>Alta affidabilità</li></ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: diagramma a blocchi/flusso -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Architettura</div>
+        <h2>Struttura agentica</h2>
+        <div class="flow">
+          <div class="flow-box">Input / Utente</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-box highlight">Agent orchestratore</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-box">Tool / Agent specializzato</div>
+          <div class="flow-arrow"></div>
+          <div class="flow-box">Output</div>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: demo / screenshot -->
+    <section class="slide">
+      <div class="content">
+        <div class="kicker">Demo</div>
+        <h2>La soluzione in azione</h2>
+        <div class="demo-frame">
+          <!-- Sostituire con <img src="..."> o <iframe src="..."></iframe> -->
+          <div class="demo-placeholder">Screenshot o iframe della demo qui</div>
+        </div>
+        <div class="demo-caption">Didascalia: cosa si vede nello screenshot/demo</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+    <!-- SLIDE: chiusura / grazie -->
+    <section class="slide closing bg-dark">
+      <div class="content closing">
+        <div class="kicker">Grazie</div>
+        <h1>Domande?</h1>
+        <p class="subtitle">Team · Repository GitHub</p>
+        <div class="contacts">accenture<span style="color:var(--purple-light)">&gt;</span> — contatti del team</div>
+      </div>
+      <div class="footer">
+        <span class="wordmark">accenture<span class="chevron">&gt;</span></span>
+        <span class="page-num"></span>
+      </div>
+    </section>
+    <!-- /SLIDE -->
+
+  </div>
+</div>
+
+<div class="nav-hit left" id="hit-prev"></div>
+<div class="nav-hit right" id="hit-next"></div>
+
+<div id="nav-ui">
+  <button id="btn-prev" aria-label="Slide precedente">&#8592;</button>
+  <span id="counter">1 / 1</span>
+  <button id="btn-next" aria-label="Slide successiva">&#8594;</button>
+</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 0;
+
+  // Numera automaticamente footer e pagine, cosi' duplicare/riordinare le slide resta sicuro
+  slides.forEach(function(s, i){
+    var pn = s.querySelector('.page-num');
+    if (pn) pn.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  });
+
+  function render(){
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === current); });
+    var counter = document.getElementById('counter');
+    if (counter) counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  function goTo(i){
+    if (i < 0 || i >= total) return;
+    current = i;
+    render();
+  }
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  function resize(){
+    var scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.position = 'absolute';
+    deck.style.top = '50%';
+    deck.style.left = '50%';
+    deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'ArrowDown'){
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){
+      e.preventDefault(); prev();
+    } else if (e.key === 'Home'){
+      goTo(0);
+    } else if (e.key === 'End'){
+      goTo(total - 1);
+    }
+  });
+
+  document.getElementById('btn-next').addEventListener('click', next);
+  document.getElementById('btn-prev').addEventListener('click', prev);
+  document.getElementById('hit-next').addEventListener('click', next);
+  document.getElementById('hit-prev').addEventListener('click', prev);
+
+  resize();
+  render();
+})();
+</script>
+
+</body>
+</html>

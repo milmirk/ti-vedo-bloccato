@@ -3,6 +3,8 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
-# copia locale della struttura agentica (vedi agents/README.md)
-/.claude/
-/CLAUDE.md
+# copie locali della struttura agentica (vedi <demo>/agents/README.md)
+.claude/
+/ti-vedo-bloccato/CLAUDE.md
+# Gratta e Capisci (Fortuna in Chiaro) traccia la propria configurazione agentica in uso
+!/gratta-e-capisci/.claude/

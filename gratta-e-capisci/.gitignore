@@ -1,0 +1,13 @@
+# Materiale interno del corso: non va nel repository pubblico
+00_input/
+kb/
+
+# Impostazioni locali e segreti
+.claude/settings.local.json
+.env
+*.key
+
+# Sistema
+Thumbs.db
+desktop.ini
+*.zip

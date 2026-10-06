@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bilancio senza numeri · Hagenthon</title>
+<style>
+  :root {
+    --p: #A100FF;
+    --p2: #7500C0;
+    --p3: #460073;
+    --pl: #BE82FF;
+    --pll: #DCAFFF;
+    --rose: #FF50A0;
+    --ok: #4ADE80;
+    --t1: rgba(255,255,255,0.92);
+    --t2: rgba(255,255,255,0.62);
+    --t3: rgba(255,255,255,0.38);
+    --line: rgba(255,255,255,0.12);
+    --ease: cubic-bezier(.2,.7,.2,1);
+    --pa: #0066CC;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden; }
+  body { font-family: "Graphik", "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+  .stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; }
+
+  .slide {
+    position: absolute; inset: 0; padding: 120px 150px 110px; display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; transition: opacity .7s var(--ease), visibility .7s;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+
+  .r { opacity: 0; transform: translateY(46px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: calc(var(--d, 0) * 110ms); }
+  .slide.active .r { opacity: 1; transform: none; }
+  .frag { opacity: 0; transform: translateY(28px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .frag.on { opacity: 1; transform: none; }
+
+  .glow { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; background: radial-gradient(circle, rgba(161,0,255,.32), rgba(161,0,255,0) 62%); pointer-events: none; filter: blur(10px); }
+  .bigmark {
+    position: absolute; right: -60px; bottom: -260px; font-size: 1500px; line-height: 1; font-weight: 800;
+    background: linear-gradient(160deg, rgba(161,0,255,.55), rgba(70,0,115,0) 70%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; pointer-events: none; user-select: none;
+  }
+
+  .eyebrow { font-size: 22px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--pl); }
+  h1 { font-size: 190px; line-height: .95; letter-spacing: -.045em; margin: 34px 0 0; font-weight: 800; }
+  h2 { font-size: 88px; line-height: 1.02; letter-spacing: -.035em; margin: 26px 0 0; font-weight: 750; }
+  h3 { font-size: 38px; margin: 0; letter-spacing: -.015em; font-weight: 700; }
+  p { margin: 0; }
+  .gt { color: var(--p); }
+  .grad { background: linear-gradient(90deg, var(--pll), var(--p)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 40px; line-height: 1.35; color: var(--t2); max-width: 1300px; }
+  .lead b { color: #fff; }
+  .muted { color: var(--t2); }
+  .small { font-size: 24px; color: var(--t3); }
+  .spacer { flex: 1; }
+
+  .card { border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 28px; padding: 42px; }
+  .card.hot { border-color: rgba(161,0,255,.55); background: linear-gradient(160deg, rgba(161,0,255,.18), rgba(161,0,255,.03)); }
+  .card p.desc { font-size: 28px; line-height: 1.35; color: var(--t2); margin-top: 18px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+
+  .stat { font-size: 112px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .stat small { font-size: 40px; font-weight: 600; color: var(--pl); letter-spacing: 0; }
+
+  /* Persona */
+  .persona { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 40px; align-items: start; }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+  .facts li { font-size: 34px; line-height: 1.35; color: var(--t1); padding-left: 44px; position: relative; }
+  .facts li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .facts li b { color: #fff; }
+  .goal { font-size: 26px; letter-spacing: .25em; text-transform: uppercase; color: var(--pl); font-weight: 700; }
+
+  /* Punti di blocco */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 56px; }
+  .wall .card { padding: 34px; display: flex; flex-direction: column; }
+  .wall .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .wall h3 { font-size: 36px; margin-top: 12px; }
+  .wall p { font-size: 25px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .mini { margin-top: auto; border-radius: 14px; background: #fff; color: #19191a; padding: 18px; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; }
+  .wall p + .mini { margin-top: 24px; }
+  .mini .lbl { font-size: 18px; font-weight: 700; color: #17324d; }
+  .mini .in { font-family: Consolas, monospace; font-size: 18px; border-bottom: 2px solid #d9364f; background: #fdf1f3; padding: 6px 8px; margin-top: 6px; }
+  .mini .err { color: #d9364f; font-size: 17px; margin-top: 6px; }
+  .mini .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+  .mini .cal i { height: 22px; background: #eceef0; border-radius: 3px; }
+  .mini .calhead { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
+  .mini .calhead span { color: #b1b8bf; font-weight: 400; font-size: 14px; }
+  .mini .dis { display: inline-block; background: #e3e4e6; color: #9aa5b1; font-weight: 700; font-size: 18px; padding: 10px 16px; }
+  .mini .clic { display: block; color: var(--rose); font-weight: 800; font-size: 18px; margin-top: 8px; }
+  .mini .tabs { display: flex; gap: 6px; }
+  .mini .tabs span { flex: 1; font-size: 15px; padding: 8px 10px; border-radius: 8px 8px 0 0; background: #eceef0; color: #5c6f82; }
+  .mini .tabs span.on { background: var(--pa); color: #fff; }
+
+  /* Mercato */
+  .quad { display: grid; grid-template-columns: 240px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 20px; margin-top: 40px; }
+  .quad .ax { font-size: 20px; letter-spacing: .2em; text-transform: uppercase; color: var(--t3); font-weight: 700; display: flex; align-items: center; line-height: 1.4; }
+  .quad .ax.c { justify-content: center; }
+  .quad .card { padding: 30px 36px; }
+  .quad .card b { font-size: 34px; display: block; }
+  .quad .card span { display: block; font-size: 24px; color: var(--t2); margin-top: 10px; line-height: 1.35; }
+  .quad .card .tag { font-size: 17px; letter-spacing: .15em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin: 0 0 10px; }
+  .quad .hot .tag { color: var(--pll); }
+
+  /* Ciclo */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 70px; }
+  .step { border-radius: 26px; padding: 34px; border: 1px solid var(--line); background: rgba(255,255,255,.035); position: relative; }
+  .step .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .step h3 { margin-top: 14px; font-size: 34px; }
+  .step p { font-size: 27px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .step p b { color: #fff; }
+  .step.bad { border-color: rgba(255,80,160,.7); background: rgba(255,80,160,.08); }
+  .step.good { border-color: rgba(74,222,128,.7); background: rgba(74,222,128,.07); }
+  .step.hotstep { border-color: rgba(161,0,255,.6); background: rgba(161,0,255,.1); }
+  .mono { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 24px; background: rgba(0,0,0,.4); border-radius: 12px; padding: 14px 16px; margin-top: 18px; color: #fff; line-height: 1.4; }
+  .x { color: var(--rose); font-weight: 800; }
+  .v { color: var(--ok); font-weight: 800; }
+
+  /* Prima e dopo: replica della pagina */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 26px; align-items: start; }
+  .ba .lab { font-size: 22px; letter-spacing: .3em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin-bottom: 16px; }
+  .ba .lab.after { color: var(--pll); }
+  .page { background: #fff; color: #19191a; border-radius: 18px; overflow: hidden; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .page .bar { background: var(--pa); color: #fff; font-weight: 700; font-size: 20px; padding: 12px 24px; }
+  .page .body { padding: 16px 28px 18px; }
+  .page .count { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5c6f82; }
+  .page .h { font-size: 28px; font-weight: 700; color: #17324d; margin: 2px 0 12px; }
+  .page .alert { border-left: 4px solid #d9364f; background: #fdf1f3; color: #8a1c2b; padding: 6px 12px; font-size: 16px; margin-bottom: 10px; }
+  .page .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
+  .page .f .l { font-size: 16px; font-weight: 700; color: #17324d; }
+  .page .f .i { border-bottom: 1px solid #5c6f82; height: 30px; font-family: Consolas, monospace; font-size: 16px; padding: 5px 4px 0; }
+  .page .f.bad .i { border-bottom: 2px solid #d9364f; background: #fdf1f3; }
+  .page .f .e { color: #d9364f; font-size: 14px; height: 18px; margin-top: 3px; }
+  .page .btns { display: flex; justify-content: space-between; margin-top: 16px; }
+  .page .btns span { border: 2px solid var(--pa); color: var(--pa); font-weight: 700; font-size: 17px; padding: 7px 20px; }
+  .page .btns span.pri { background: var(--pa); color: #fff; }
+  .tvb { margin: 14px 0 2px; border: 2px solid var(--p3); border-left-width: 6px; border-radius: 12px; padding: 12px 16px; font-family: system-ui, "Segoe UI", Arial, sans-serif; box-shadow: 0 6px 20px rgba(10,0,20,.12); }
+  .tvb .t { font-weight: 700; color: var(--p3); font-size: 17px; }
+  .tvb .t .gt { font-size: 21px; margin-right: 6px; }
+  .tvb .tx { font-size: 18px; line-height: 1.42; margin-top: 4px; color: #1a1a1a; }
+  .tvb .acts { display: flex; gap: 8px; margin-top: 10px; }
+  .tvb .acts span { border: 2px solid var(--p3); color: var(--p3); border-radius: 8px; font-weight: 700; font-size: 14px; padding: 5px 12px; }
+  .tvb .acts span.pri { background: var(--p); border-color: var(--p); color: #fff; }
+  .ba .cap { font-size: 25px; color: var(--t2); margin-top: 14px; line-height: 1.32; }
+  .ba .cap b { color: #fff; }
+
+  /* Segnali */
+  .sig { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 48px; }
+  .sig .card { padding: 26px 30px; }
+  .sig .when { font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--pll); font-weight: 700; }
+  .sig h3 { font-size: 30px; margin-top: 10px; }
+  .sig p { font-size: 23px; color: var(--t2); line-height: 1.35; margin-top: 10px; }
+
+  /* Architettura */
+  .arch { position: relative; margin-top: 40px; height: 610px; }
+  .node { position: absolute; border-radius: 26px; padding: 26px 30px; width: 400px; }
+  .node .k { font-size: 18px; letter-spacing: .25em; text-transform: uppercase; font-weight: 700; }
+  .node b { display: block; font-size: 36px; margin-top: 8px; }
+  .node span { display: block; font-size: 23px; color: var(--t2); margin-top: 8px; line-height: 1.3; }
+  .node.ai { border: 2px solid var(--p); background: #1b0a2b; }
+  .node.ai .k { color: var(--pl); }
+  .node.code { border: 2px dashed rgba(255,255,255,.55); background: #0e0e10; }
+  .node.code .k { color: rgba(255,255,255,.7); }
+  .node.ui { border: 2px solid #fff; background: #fff; color: #000; }
+  .node.ui .k { color: var(--p2); }
+  .node.ui span { color: #333; }
+  .arch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .arch path { fill: none; stroke: rgba(190,130,255,.7); stroke-width: 3; stroke-dasharray: 10 10; }
+  .slide.active .arch path { animation: dash 1.6s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -40; } }
+
+  /* Liste a colonne */
+  .cols3 h3 { font-size: 36px; }
+  .cols3 ul { list-style: none; padding: 0; margin: 22px 0 0; }
+  .cols3 li { font-size: 28px; line-height: 1.35; color: var(--t1); padding-left: 34px; position: relative; margin-bottom: 16px; }
+  .cols3 li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .cols3 ul.no li::before { content: "×"; color: var(--rose); }
+
+  .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; }
+  .feat .card { padding: 28px 32px; }
+  .feat .ic { font-size: 48px; font-weight: 800; color: var(--p); line-height: 1; height: 54px; }
+  .feat h3 { margin-top: 12px; font-size: 32px; }
+  .feat p { font-size: 24px; color: var(--t2); line-height: 1.35; margin-top: 12px; }
+
+  .tree { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 25px; line-height: 1.55; color: var(--t1); white-space: pre; }
+  .tree .c { color: var(--t3); }
+  .tree .h { color: var(--pl); font-weight: 700; }
+  table.rev { width: 100%; border-collapse: collapse; font-size: 24px; }
+  table.rev th { text-align: left; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: var(--pl); padding: 0 18px 14px 0; font-weight: 700; }
+  table.rev td { padding: 14px 18px 14px 0; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.32; color: var(--t1); }
+  table.rev td:first-child { font-weight: 700; white-space: nowrap; }
+
+  .demo { counter-reset: d; display: grid; grid-template-columns: 1fr 1fr; gap: 26px 60px; margin-top: 60px; }
+  .demo li { list-style: none; font-size: 34px; line-height: 1.3; display: grid; grid-template-columns: 76px 1fr; align-items: start; }
+  .demo li::before { counter-increment: d; content: counter(d); font-size: 30px; font-weight: 800; color: #000; background: var(--p); border-radius: 50%; width: 54px; height: 54px; display: grid; place-items: center; }
+  .demo li span { display: block; font-size: 25px; color: var(--t2); margin-top: 6px; }
+  .url { font-family: "Cascadia Code", Consolas, monospace; font-size: 26px; color: var(--pll); }
+
+  .closing h2 { font-size: 120px; }
+
+  .progress { position: fixed; left: 0; top: 0; height: 5px; width: 100%; background: rgba(255,255,255,.06); z-index: 10; }
+  .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--p2), var(--p)); transition: width .5s var(--ease); }
+  .hud { position: fixed; right: 28px; bottom: 20px; font-size: 14px; letter-spacing: .2em; color: rgba(255,255,255,.4); z-index: 10; font-variant-numeric: tabular-nums; }
+  .brandbar { position: absolute; left: 150px; right: 150px; bottom: 44px; display: flex; justify-content: space-between; font-size: 18px; letter-spacing: .25em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+  .brandbar b { color: rgba(255,255,255,.55); font-weight: 700; }
+  .help { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.4); z-index: 10; letter-spacing: .05em; transition: opacity .6s; }
+  .help.gone { opacity: 0; }
+  @media print { .progress, .hud, .help { display: none; } }
+</style>
+<style>
+  /* ---- Bilancio senza numeri: pezzi specifici delle slide (il resto è identico a ti-vedo-bloccato) ---- */
+  .emo { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
+
+  /* Il muro: l'app della banca */
+  .wall2 { display: grid; grid-template-columns: 760px 1fr; gap: 80px; margin-top: 40px; align-items: center; }
+  .bankapp { background: #fff; color: #1b1b1f; border-radius: 26px; overflow: hidden; font-family: "Segoe UI", Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .bankapp .bh { background: #0B3D91; color: #fff; padding: 22px 32px 24px; }
+  .bankapp .bh .acc { font-size: 19px; opacity: .85; }
+  .bankapp .bh .lbl { font-size: 20px; margin-top: 14px; opacity: .9; }
+  .bankapp .bh .bal { font-size: 66px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .bankapp .bh .bal2 { font-size: 19px; opacity: .85; margin-top: 6px; }
+  .bankapp .mv { padding: 6px 32px 16px; }
+  .bankapp .mv .t { font-size: 17px; letter-spacing: .15em; text-transform: uppercase; color: #5f6672; font-weight: 700; padding: 12px 0 4px; }
+  .bankapp .row { display: grid; grid-template-columns: 76px 1fr auto; gap: 16px; padding: 12px 0; border-top: 1px solid #e3e6ea; align-items: baseline; }
+  .bankapp .row .d { color: #5f6672; font-family: Consolas, monospace; font-size: 18px; }
+  .bankapp .row .c { font-family: Consolas, monospace; font-size: 18px; color: #2b2f36; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bankapp .row .a { font-weight: 700; font-family: Consolas, monospace; font-size: 19px; color: #b42318; }
+  .notes { list-style: none; padding: 0; margin: 0; display: grid; gap: 26px; }
+  .notes li { font-size: 33px; line-height: 1.3; padding-left: 58px; position: relative; color: var(--t1); }
+  .notes li::before { content: "?"; position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--rose); color: #000; font-weight: 800; font-size: 26px; display: grid; place-items: center; }
+  .notes li b { color: #fff; }
+
+  /* Prima e dopo: telefono con l'app */
+  .phone { background: #FBF5EE; color: #24152F; border-radius: 34px; padding: 22px 24px 20px; font-family: "Segoe UI", system-ui, Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); border: 8px solid #1a1320; }
+  .phone .pb { font-size: 16px; color: #5B4A66; }
+  .phone .pb b { color: #24152F; }
+  .phone .pb .gt { font-weight: 900; color: #7500C0; }
+  .phone .pc { background: #fff; border: 1px solid #E7D9CB; border-radius: 18px; padding: 14px 18px; margin-top: 12px; }
+  .phone .pt { font-size: 23px; font-weight: 800; }
+  .phone .ps { font-size: 16px; font-weight: 750; color: #5B4A66; letter-spacing: .02em; }
+  .phone .pdots { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .phone .pdots i { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #7500C0; font-style: normal; }
+  .phone .pdots i.on { background: #7500C0; }
+  .phone .pdots i.pay { border-color: #1E6B41; background: #E2F3E8; font-size: 12px; display: grid; place-items: center; }
+  .phone .jarrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .phone .pjar { position: relative; background: linear-gradient(180deg, #FFFBF4, #FFF4E2); border: 2px solid #E9C48C; border-radius: 12px 12px 20px 20px; padding: 14px 6px 8px; text-align: center; }
+  .phone .pjar::before { content: ""; position: absolute; top: -7px; left: 24%; right: 24%; height: 10px; border-radius: 5px; background: #B7792C; }
+  .phone .pjar .ic { font-size: 21px; line-height: 1.25; }
+  .phone .pjar .lb { font-size: 15px; font-weight: 700; margin-top: 4px; }
+  .phone .today { background: linear-gradient(160deg, #F3E6FC, #fff 75%); border-color: #DCC2F2; }
+  .phone .today .ic { font-size: 30px; margin-top: 4px; }
+  .phone .today .tx { font-size: 23px; font-weight: 800; color: #460073; }
+  .phone .today .fu { font-size: 16px; color: #5B4A66; font-weight: 600; margin-top: 2px; }
+  .phone .tog { margin-top: 12px; display: flex; gap: 10px; }
+  .phone .tog span { flex: 1; border: 2px solid #7500C0; color: #7500C0; border-radius: 14px; font-weight: 700; font-size: 15px; padding: 9px 6px; text-align: center; }
+  .phone.bankph { background: #fff; padding: 0; overflow: hidden; }
+  .phone.bankph .bh { background: #0B3D91; color: #fff; padding: 26px 28px; }
+  .phone.bankph .bh .lbl { font-size: 18px; opacity: .9; }
+  .phone.bankph .bh .bal { font-size: 60px; font-weight: 800; letter-spacing: -.02em; }
+  .phone.bankph .bh .bal2 { font-size: 17px; opacity: .85; }
+  .phone.bankph .rows { padding: 6px 28px 18px; }
+  .phone.bankph .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 11px 0; border-top: 1px solid #e3e6ea; font-family: Consolas, monospace; font-size: 17px; }
+  .phone.bankph .row b { color: #b42318; }
+  .phone.bankph .ask { margin: 8px 28px 24px; border: 3px dashed var(--rose); border-radius: 16px; padding: 16px 18px; font-size: 24px; font-weight: 800; color: #9b1c4f; text-align: center; }
+
+  /* Evidenza */
+  .evgrid { display: grid; grid-template-columns: 820px 1fr; gap: 70px; margin-top: 40px; align-items: start; }
+  .evp { background: #fff; color: #24152F; border-radius: 26px; padding: 28px 32px; font-family: "Segoe UI", system-ui, Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .evp .h { font-size: 30px; font-weight: 800; }
+  .evp .tot { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .evp .er { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; padding: 14px 18px; border-radius: 16px; background: #FCF8F3; border: 1px solid #E7D9CB; margin-top: 12px; align-items: center; }
+  .evp .er.cur { border: 2px solid #7500C0; background: #F3E6FC; }
+  .evp .er .l { font-weight: 750; font-size: 22px; }
+  .evp .er .s { color: #5B4A66; font-weight: 650; font-size: 20px; }
+  .evp .mks { grid-column: 1 / -1; display: flex; gap: 8px; }
+  .evp .mk { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 19px; }
+  .evp .mk.ok { background: #1E6B41; }
+  .evp .mk.no { background: #8A4B00; }
+  .evp .mk.ns { background: #6E6178; }
+  .evp .tag { font-size: 14px; background: #7500C0; color: #fff; border-radius: 99px; padding: 3px 10px; margin-left: 8px; vertical-align: middle; font-weight: 700; }
+  .evp .best { margin-top: 16px; font-weight: 750; font-size: 21px; color: #1E6B41; }
+  .evp .chg { margin-top: 12px; font-size: 18px; color: #5B4A66; line-height: 1.4; }
+  .warnbox { border: 2px dashed rgba(255,80,160,.75); background: rgba(255,80,160,.08); border-radius: 22px; padding: 24px 28px; font-size: 25px; line-height: 1.38; color: var(--t1); margin-top: 26px; }
+  .warnbox b { color: var(--rose); }
+  .facts.tight li { font-size: 29px; }
+</style>
+</head>
+<body>
+<div class="progress"><span id="bar"></span></div>
+<div class="hud" id="hud"></div>
+<div class="help">← → per navigare · F schermo intero</div>
+
+<div class="deck">
+<div class="stage" id="stage">
+
+  <!-- 1 · Titolo -->
+  <section class="slide" data-title="Titolo">
+    <div class="glow" style="left:-400px; top:-500px"></div>
+    <div class="bigmark">&gt;</div>
+    <div class="spacer"></div>
+    <span class="eyebrow r" style="--d:1">Hagenthon · Tema 02 · Inclusione finanziaria</span>
+    <h1 class="r" style="--d:2">Bilancio<br>senza numeri<span class="gt">&gt;</span></h1>
+    <p class="lead r" style="--d:4; margin-top:46px; max-width:1300px">Il budget per chi fa fatica con i numeri: i soldi che restano, mostrati come <b>le cose che compri</b>. E un coach che <b>controlla se è chiaro</b>, e cambia modo quando non lo è.</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span style="letter-spacing:.1em">github.com/milmirk/ti-vedo-bloccato/tree/main/bilancio-senza-numeri</span></div>
+  </section>
+
+  <!-- 2 · Problema -->
+  <section class="slide" data-title="Il problema">
+    <span class="eyebrow r">Il problema</span>
+    <h2 class="r" style="--d:1">Il saldo è un numero.<br><span class="grad">Se basta fino allo stipendio, non lo dice.</span></h2>
+    <div class="grid3" style="margin-top:56px">
+      <div class="card r" style="--d:3"><div class="stat" style="font-size:96px">186,40<small> €</small></div><p class="desc">Il saldo dice quanto c'è oggi. Non dice se arriva fino al giorno di paga, né quanto si può usare oggi.</p></div>
+      <div class="card r" style="--d:4"><div class="stat">÷<small> giorni</small></div><p class="desc">Per saperlo bisogna dividere per i giorni che mancano e sottrarre ogni spesa: un conto che tutti danno per scontato.</p></div>
+      <div class="card hot r" style="--d:5"><div class="stat">0<small> app trovate</small></div><p class="desc">in italiano, che mostrino il budget senza numeri. Anche quelle per chi ha difficoltà mostrano una cifra (verifica del 5 ottobre 2026).</p></div>
+    </div>
+    <p class="lead r" style="--d:7; margin-top:48px; font-size:36px">Per chi ha <b>discalculia</b> o poca confidenza con i numeri, il budget non è una questione di volontà: <b>è una questione di rappresentazione</b>.</p>
+  </section>
+
+  <!-- 3 · Persona -->
+  <section class="slide" data-title="Persona">
+    <div class="glow" style="right:-600px; top:-300px"></div>
+    <span class="eyebrow r">User difficulty statement</span>
+    <div class="persona">
+      <div>
+        <h2 class="r" style="--d:1; margin-top:0; font-size:112px">Marco,<br><span class="grad">35 anni.</span></h2>
+        <p class="lead r" style="--d:3; margin-top:40px">Ha la <b>discalculia</b>. Lavora, ha uno stipendio, paga le sue cose. A metà mese <b>va in rosso</b>, e non capisce perché.</p>
+      </div>
+      <div>
+        <p class="goal r" style="--d:2">Cosa gli succede</p>
+        <ul class="facts tight r" style="--d:4; margin-top:26px">
+          <li>Guarda il saldo, ma <b>«186,40 €»</b> non gli dice se arriva al giorno di paga.</li>
+          <li>Dividere per i giorni che mancano gli costa uno sforzo enorme: <b>di solito non lo fa</b>.</li>
+          <li>La lista dei movimenti è fatta di date, sigle e importi con la virgola.</li>
+          <li>Le app di budget gli mostrano altri numeri: grafici, percentuali, «quanto puoi spendere».</li>
+          <li>Però sa benissimo <b>cosa costa un caffè, una pizza, la spesa</b>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Il muro -->
+  <section class="slide" data-title="Il muro">
+    <span class="eyebrow r">La barriera</span>
+    <h2 class="r" style="--d:1">Quello che vede Marco, oggi.</h2>
+    <div class="wall2">
+      <div class="bankapp r" style="--d:2">
+        <div class="bh">
+          <div class="acc">Conto corrente · IT** **** 4821</div>
+          <div class="lbl">Saldo disponibile</div>
+          <div class="bal">186,40 €</div>
+          <div class="bal2">Saldo contabile 201,60 € · aggiornato al 05/10</div>
+        </div>
+        <div class="mv">
+          <div class="t">Ultimi movimenti</div>
+          <div class="row"><span class="d">05/10</span><span class="c">PAGAMENTO POS 0411 BAR CENTRALE SRL</span><span class="a">-1,20</span></div>
+          <div class="row"><span class="d">04/10</span><span class="c">ADDEBITO SDD CORE ENERGIA CID IT45ZZZ</span><span class="a">-48,90</span></div>
+          <div class="row"><span class="d">04/10</span><span class="c">POS 0410 PIZZ. DA TONI 19:42 CARTA *1187</span><span class="a">-8,00</span></div>
+          <div class="row"><span class="d">03/10</span><span class="c">PRELIEVO ATM 03/10 H 18:32 CIRCUITO</span><span class="a">-50,00</span></div>
+          <div class="row"><span class="d">02/10</span><span class="c">COMM. CANONE MENSILE CONTO</span><span class="a">-2,50</span></div>
+          <div class="row"><span class="d">01/10</span><span class="c">PAGAMENTO POS 0399 SUPERMERCATO 2</span><span class="a">-24,60</span></div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li class="r" style="--d:3">Due saldi diversi. <b>Quale conta?</b></li>
+        <li class="r" style="--d:4">Sigle e codici: POS, SDD, ATM, CID.</li>
+        <li class="r" style="--d:5">Importi con la virgola e il segno meno, da sommare a mente.</li>
+        <li class="r" style="--d:6">E nessuna risposta alla domanda vera: <b>«ci arrivo al giorno di paga? Una pizza stasera me la posso permettere?»</b></li>
+      </ul>
+    </div>
+    <p class="small r" style="--d:7; margin-top:26px">Schermata dimostrativa: dati inventati, non è l'app di una banca reale.</p>
+  </section>
+
+  <!-- 5 · Mercato -->
+  <section class="slide" data-title="Mercato">
+    <span class="eyebrow r">Verifica di mercato</span>
+    <h2 class="r" style="--d:1">Chi fa il budget mostra numeri.<br><span class="grad">Chi evita i numeri non fa il budget.</span></h2>
+    <div class="quad">
+      <span></span>
+      <span class="ax c r" style="--d:2">Mostra numeri</span>
+      <span class="ax c r" style="--d:2">Senza numeri</span>
+      <span class="ax r" style="--d:3">Fa il<br>budget</span>
+      <div class="card r" style="--d:3"><span class="tag">esiste</span><b>SafeToSpend, DaySum · Monzo Pots</b><span>Il «quanto puoi spendere oggi» resta una cifra. I salvadanai sono numerici.</span></div>
+      <div class="card hot r" style="--d:5"><span class="tag">nessun prodotto trovato</span><b>Bilancio senza numeri</b><span>Il budget in oggetti, con domande che verificano se è chiaro. Solo progetti di studenti (PayAbility, Stanford).</span></div>
+      <span class="ax r" style="--d:4">Non fa il<br>budget</span>
+      <div class="card r" style="--d:4"><span class="tag">esiste</span><b>App delle banche</b><span>Saldo e movimenti: date, sigle, importi.</span></div>
+      <div class="card r" style="--d:6"><span class="tag">esiste</span><b>Dysia (iOS, in inglese)</b><span>Aiuta alla cassa gli adulti con discalculia. Non fa il budget.</span></div>
+    </div>
+    <p class="small r" style="--d:7; margin-top:18px">Ricerca web del 5 ottobre 2026. Per Understood.org poche app si rivolgono ad adulti con difficoltà con i numeri.</p>
+  </section>
+
+  <!-- 6 · Prima e dopo -->
+  <section class="slide" data-title="Prima e dopo">
+    <span class="eyebrow r">Before / after simplicity evidence</span>
+    <h2 class="r" style="--d:1; font-size:72px">Stessi soldi, <span class="grad">un'altra lingua.</span></h2>
+    <div class="ba">
+      <div class="r" style="--d:2">
+        <div class="lab">Prima · l'app della banca</div>
+        <div class="phone bankph">
+          <div class="bh"><div class="lbl">Saldo disponibile</div><div class="bal">137,80 €</div><div class="bal2">Prossimo accredito: 17/10</div></div>
+          <div class="rows">
+            <div class="row"><span>06/10 POS BAR CENTRALE</span><b>-1,20</b></div>
+            <div class="row"><span>05/10 POS PIZZ. DA TONI</span><b>-8,00</b></div>
+            <div class="row"><span>05/10 POS TRATTORIA</span><b>-12,00</b></div>
+          </div>
+          <div class="ask">137,80 ÷ 11 = ? &nbsp;Una pizza stasera?</div>
+        </div>
+        <p class="cap">Un numero. Per Marco <b>non dice se basta</b>.</p>
+      </div>
+      <div class="frag">
+        <div class="lab after">Dopo · Bilancio senza numeri</div>
+        <div class="phone">
+          <div class="pb"><span class="gt">&gt;</span> Bilancio <b>senza numeri</b></div>
+          <div class="pc"><div class="pt">Fino a sabato diciassette ottobre · tra undici giorni</div>
+            <div class="pdots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="pay emo">💶</i></div></div>
+          <div class="pc"><div class="ps">Ti restano</div>
+            <div class="jarrow">
+              <div class="pjar"><div class="ic emo">🛒🛒🛒🛒🛒</div><div class="lb">cinque spese piccole</div></div>
+              <div class="pjar"><div class="ic emo">🍝</div><div class="lb">un pranzo fuori</div></div>
+              <div class="pjar"><div class="ic emo">🪙</div><div class="lb">qualche spicciolo</div></div>
+            </div></div>
+          <div class="pc today"><div class="ps">Oggi puoi usare circa</div><div class="ic emo">🍕 ☕☕</div><div class="tx">una pizza e due caffè</div><div class="fu">Da domani, ogni giorno circa: un pranzo fuori.</div></div>
+          <div class="tog"><span>🔊 Leggimelo</span><span>Mostra anche gli euro</span></div>
+        </div>
+        <p class="cap">Oggetti che conosce, e la parte di oggi <b>già calcolata</b>. La cifra esatta è a un tocco.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Soluzione -->
+  <section class="slide" data-title="La soluzione">
+    <div class="glow" style="left:20%; top:-800px"></div>
+    <span class="eyebrow r">La soluzione</span>
+    <h2 class="r" style="--d:1">Vede in oggetti. Segna con un tocco.<br><span class="grad">Controlla di aver capito.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Imposta</span><h3>Tre tocchi</h3><p>L'<b>unico numero</b>: quanto c'è. Poi il giorno di paga sul calendario e tre-cinque oggetti suoi.</p></div>
+      <div class="step r" style="--d:4"><span class="n">2 · Vede</span><h3>Oggetti, non cifre</h3><p>Quanto resta e la parte di oggi, in caffè, pizze, spese. I giorni sono puntini. Gli euro solo se li chiede.</p></div>
+      <div class="step r" style="--d:5"><span class="n">3 · Segna</span><h3>Un tocco</h3><p>«Ho preso: un caffè». Si annulla con un tocco. Oppure lo scrive a parole: «spesa, circa 30 euro».</p></div>
+      <div class="step hotstep r" style="--d:6"><span class="n">4 · Capisce</span><h3>Domande vere</h3><p>«Se prima di sabato prendi sei spese piccole, bastano i soldi?» Se non è chiaro, <b>cambia modo di mostrarli</b>.</p></div>
+    </div>
+    <p class="lead r" style="--d:8; margin-top:60px">Un coach che aiuta a <b>capire</b> il proprio budget. <b>Non dice cosa comprare</b>: mostra i fatti.</p>
+  </section>
+
+  <!-- 8 · Architettura -->
+  <section class="slide" data-title="Architettura agentica">
+    <span class="eyebrow r">Architettura</span>
+    <h2 class="r" style="--d:1">I conti sono codice. <span class="grad">L'AI legge e basta.</span></h2>
+    <div class="arch r" style="--d:2">
+      <svg viewBox="0 0 1620 610" preserveAspectRatio="none">
+        <path d="M400 110 L610 110" />
+        <path d="M1010 110 L1220 110" />
+        <path d="M400 470 L610 470" />
+        <path d="M810 360 L810 236" />
+        <path d="M1420 236 L1420 360" />
+      </svg>
+      <div class="node ui" style="left:0; top:20px"><span class="k">Interfaccia</span><b>Tocchi e tastierino</b><span>Un solo numero, poi solo oggetti. Voce e tastiera.</span></div>
+      <div class="node code" style="left:610px; top:20px"><span class="k">Codice · lib/</span><b>Conti in centesimi</b><span>Scomposizione greedy, giorni, parte di oggi.</span></div>
+      <div class="node ui" style="left:1220px; top:20px"><span class="k">Interfaccia</span><b>Schermata</b><span>Senza numeri: barattoli, puntini, voce. Euro a richiesta.</span></div>
+      <div class="node ai" style="left:0; top:360px"><span class="k">Agente AI</span><b>Interprete</b><span>Facoltativo. «due caffè e un panino» → voci in JSON.</span></div>
+      <div class="node code" style="left:610px; top:360px"><span class="k">Codice · server</span><b>Validatore</b><span>Importi solo dal testo o dai prezzi noti.</span></div>
+      <div class="node code" style="left:1220px; top:360px"><span class="k">Codice · lib/</span><b>Domande</b><span>Risposta giusta dai dati. Se non torna, cambia il modo.</span></div>
+    </div>
+    <p class="r" style="--d:5; font-size:46px; font-weight:700; margin-top:34px">L'AI legge le parole. <span class="grad">Il codice fa i conti. Sempre.</span></p>
+  </section>
+
+  <!-- 9 · Ciclo adattivo -->
+  <section class="slide" data-title="Ciclo adattivo">
+    <span class="eyebrow r">La parte che si adatta</span>
+    <h2 class="r" style="--d:1">Se una risposta non torna,<br><span class="grad">cambia il modo di mostrare i soldi.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Domanda</span><h3>Sui suoi dati</h3><div class="mono">«Se prima di sabato prendi sei spese piccole, bastano i soldi che ti restano?»</div></div>
+      <div class="step bad frag"><span class="n">2 · Risposta</span><h3>«Non so»</h3><p>Il riscontro è un fatto: <b>«La risposta è no. Non bastano: mancherebbero soldi per circa un pranzo fuori.»</b></p></div>
+      <div class="step hotstep frag"><span class="n">3 · Cambia</span><h3>Più concreto</h3><p>Tutti gli oggetti → i più piccoli → <b>giorno per giorno</b> → solo oggi. Il cambio resta registrato.</p></div>
+      <div class="step good frag"><span class="n">4 · Funziona</span><h3><span class="v">✓</span> Tre di fila</h3><p>Il modo resta. Dopo tre risposte giuste, un errore isolato è tollerato.</p></div>
+    </div>
+    <p class="lead r" style="--d:5; margin-top:56px">Le regole sono <b>codice deterministico e testato</b>: nessuna AI decide come mostrare i soldi, e Marco può sempre scegliere a mano.</p>
+  </section>
+
+  <!-- 10 · Evidenza -->
+  <section class="slide" data-title="Evidenza di comprensione">
+    <span class="eyebrow r">Comprensione misurata</span>
+    <h2 class="r" style="--d:1; font-size:76px">Quale modo funziona, <span class="grad">per lui.</span></h2>
+    <div class="evgrid">
+      <div class="evp r" style="--d:2">
+        <div class="h">Come lo capisci meglio</div>
+        <div class="tot">Cinque domande, tre giuste.</div>
+        <div class="er"><span class="l">Tutto insieme, con tutti i tuoi oggetti</span><span class="s">Una domanda, nessuna giusta</span><span class="mks"><span class="mk ns">?</span></span></div>
+        <div class="er"><span class="l">Tutto insieme, con gli oggetti più piccoli</span><span class="s">Una domanda, nessuna giusta</span><span class="mks"><span class="mk no">→</span></span></div>
+        <div class="er cur"><span class="l">Giorno per giorno <span class="tag">in uso</span></span><span class="s">Tre domande, tre giuste</span><span class="mks"><span class="mk ok">✓</span><span class="mk ok">✓</span><span class="mk ok">✓</span></span></div>
+        <div class="best">Finora il modo che funziona meglio per te: «Giorno per giorno».</div>
+        <div class="chg">Martedì: da «Tutto insieme, con tutti i tuoi oggetti» a «Tutto insieme, con gli oggetti più piccoli», dopo un «Non so».<br>Martedì: da «… oggetti più piccoli» a «Giorno per giorno», dopo una risposta che non tornava.</div>
+      </div>
+      <div>
+        <ul class="facts r" style="--d:3">
+          <li><b>Cosa misura</b>: risposte giuste a domande sulla <b>sua</b> situazione, divise per modo di rappresentare i soldi.</li>
+          <li><b>Chi decide la risposta giusta</b>: il codice, dai suoi dati. Mai l'AI.</li>
+          <li><b>Cosa ne fa</b>: tiene il modo che funziona e lo mostra a Marco, in parole.</li>
+        </ul>
+        <div class="warnbox r" style="--d:5"><b>Esecuzione interna della demo.</b> Il pannello è l'output reale dell'app, ma le risposte le abbiamo scelte noi per mostrare il meccanismo. <b>Non è un test con persone</b>: va fatto con persone con discalculia.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · Rischio e chiarezza -->
+  <section class="slide" data-title="Rischio e chiarezza">
+    <span class="eyebrow r">Risk &amp; clarity note</span>
+    <h2 class="r" style="--d:1">Più semplice,<br><span class="grad">ma la cifra resta quella vera.</span></h2>
+    <div class="grid3 cols3" style="margin-top:40px">
+      <div class="card r" style="--d:2"><h3>Semplificato</h3><ul>
+        <li>Il saldo diventa oggetti che conosce</li>
+        <li>La divisione per i giorni la fa l'app</li>
+        <li>Le date diventano puntini e nomi dei giorni</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Non alterato</h3><ul>
+        <li>La cifra esatta: «Mostra anche gli euro», al centesimo</li>
+        <li>Il resto non sparisce: «qualche spicciolo»</li>
+        <li>Ogni spesa al prezzo scelto da lui</li>
+      </ul></div>
+      <div class="card hot r" style="--d:4"><h3>Niente ambiguità</h3><ul>
+        <li>«circa» ogni volta che si arrotonda</li>
+        <li>Domande mai a pochi centesimi dalla soglia</li>
+        <li>Fatti, non consigli: «i giorni dopo avranno un po' meno», mai «dovresti»</li>
+      </ul></div>
+    </div>
+    <p class="lead r" style="--d:6; margin-top:32px; font-size:34px">Un test automatico controlla che, con gli euro spenti, <b>nessun testo mostrato contenga cifre</b>: più di mille testi, in decine di situazioni diverse.</p>
+  </section>
+
+  <!-- 12 · Come l'abbiamo costruito -->
+  <section class="slide" data-title="Come l'abbiamo costruito">
+    <span class="eyebrow r">Come l'abbiamo costruito</span>
+    <h2 class="r" style="--d:1">Agentic coding, con revisione umana.</h2>
+    <div class="grid2" style="margin-top:50px; grid-template-columns: .74fr 1.26fr; align-items:start">
+      <div class="card r" style="--d:2; padding:36px 40px"><div class="tree"><span class="h">agents/</span>
+├─ CLAUDE.md
+├─ workflow.md
+├─ <span class="h">prompts/</span>  <span class="c"># letto dal server</span>
+│  └─ interpreta-spesa.md
+├─ <span class="h">subagents/</span>
+│  ├─ nessun-numero-reviewer
+│  └─ domande-designer
+├─ <span class="h">commands/</span>
+│  ├─ /demo-check
+│  └─ /nuova-domanda
+└─ <span class="h">skills/</span>soldi-in-oggetti</div></div>
+      <div class="card r" style="--d:3; padding:36px 40px">
+        <table class="rev">
+          <thead><tr><th>Area</th><th>AI</th><th>Revisione umana</th></tr></thead>
+          <tbody>
+            <tr><td>Specifica</td><td>Sessione principale di Claude Code: persona, vincoli, criteri</td><td>Tema e persona scelti dal team</td></tr>
+            <tr><td>Codice</td><td>Un subagente di Claude Code: app, server, 70 test</td><td>Lettura del codice, prova nel browser</td></tr>
+            <tr><td>Testi</td><td>Skill, test «nessun numero», subagente revisore</td><td>Da far leggere a persone con discalculia</td></tr>
+            <tr><td>Domande</td><td>Generatore, risposta calcolata dal codice</td><td>Da validare con chi lavora sui DSA</td></tr>
+            <tr><td>Prezzi</td><td>Valori indicativi</td><td>Ognuno mette i suoi</td></tr>
+            <tr><td>AI a runtime</td><td>Solo lettura di frasi, validata</td><td>Da provare con una chiave vera</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · Demo -->
+  <section class="slide" data-title="Demo">
+    <div class="glow" style="left:30%; top:-700px"></div>
+    <span class="eyebrow r">Demo live</span>
+    <h2 class="r" style="--d:1">Il percorso di Marco.</h2>
+    <ol class="demo" style="padding:0">
+      <li class="r" style="--d:2"><div>Tre tocchi<span>La cifra con il tastierino, il giorno di paga, quattro oggetti</span></div></li>
+      <li class="r" style="--d:3"><div>Senza numeri<span>«Ti restano: cinque spese piccole, un pranzo fuori…»</span></div></li>
+      <li class="r" style="--d:4"><div>Ho preso: un caffè<span>Un tocco, e si annulla con un tocco</span></div></li>
+      <li class="r" style="--d:5"><div>Una domanda vera<span>«Bastano?» → «Non so»: il modo di mostrarli cambia</span></div></li>
+      <li class="r" style="--d:6"><div>Leggimelo<span>Il riepilogo a voce, in italiano</span></div></li>
+      <li class="r" style="--d:7"><div>Mostra anche gli euro<span>I numeri ci sono, quando servono</span></div></li>
+    </ol>
+    <div class="spacer"></div>
+    <p class="r" style="--d:8"><span class="url">localhost:8802/?demo=marco</span> <span class="muted" style="font-size:26px">→ l'esempio di Marco, pronto</span></p>
+  </section>
+
+  <!-- 14 · Limiti e prossimi passi -->
+  <section class="slide" data-title="Limiti e prossimi passi">
+    <span class="eyebrow r">Limiti &amp; prossimi passi</span>
+    <h2 class="r" style="--d:1">Cosa sappiamo.<br><span class="grad">E cosa non sappiamo ancora.</span></h2>
+    <div class="grid3 cols3" style="margin-top:50px">
+      <div class="card r" style="--d:2"><h3>Limiti di oggi</h3><ul class="no">
+        <li>Mai provato con persone con discalculia</li>
+        <li>Prezzi indicativi finché non li cambia</li>
+        <li>La scomposizione greedy non è sempre la più intuitiva</li>
+        <li>Le spese si segnano a mano: niente collegamento alla banca</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Prossimi passi</h3><ul>
+        <li>Prove con persone e con associazioni che lavorano sui DSA</li>
+        <li>Spese fisse (affitto, bollette) messe da parte prima</li>
+        <li>Movimenti della banca letti in automatico, e trasformati in oggetti</li>
+      </ul></div>
+      <div class="card hot r" style="--d:4"><h3>Cosa resta fermo</h3><ul>
+        <li>Nessun consiglio finanziario</li>
+        <li>L'AI non fa conti</li>
+        <li>La cifra vera sempre a un tocco</li>
+        <li>I dati restano sul dispositivo</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 15 · Chiusura -->
+  <section class="slide closing" data-title="Chiusura">
+    <div class="glow" style="left:-300px; bottom:-700px"></div>
+    <div class="bigmark" style="opacity:.8">&gt;</div>
+    <div class="spacer"></div>
+    <h2 class="r" style="--d:1">Marco non deve<br>fare i conti.</h2>
+    <h2 class="r" style="--d:3; margin-top:10px"><span class="grad">Deve capire quanto gli resta.</span></h2>
+    <p class="lead r" style="--d:5; margin-top:60px">Bilancio senza numeri<span class="gt">&gt;</span> · github.com/milmirk/ti-vedo-bloccato</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span>Grazie</span></div>
+  </section>
+
+</div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const hud = document.getElementById('hud');
+  let i = 0;
+
+  const fit = () => {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  };
+
+  const frags = (s) => [...s.querySelectorAll('.frag')];
+
+  const show = (n, fromBack = false) => {
+    i = Math.max(0, Math.min(n, slides.length - 1));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    frags(slides[i]).forEach((f) => f.classList.toggle('on', fromBack));
+    bar.style.width = `${((i + 1) / slides.length) * 100}%`;
+    hud.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    history.replaceState(null, '', `#${i + 1}`);
+  };
+
+  const help = document.querySelector('.help');
+  const hideHelp = () => help.classList.add('gone');
+  setTimeout(hideHelp, 6000);
+
+  const next = () => {
+    hideHelp();
+    const hidden = frags(slides[i]).find((f) => !f.classList.contains('on'));
+    if (hidden) { hidden.classList.add('on'); return; }
+    if (i < slides.length - 1) show(i + 1);
+  };
+
+  const prev = () => {
+    const shown = frags(slides[i]).filter((f) => f.classList.contains('on'));
+    if (shown.length) { shown[shown.length - 1].classList.remove('on'); return; }
+    if (i > 0) show(i - 1, true);
+  };
+
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1, true);
+    else if (e.key.toLowerCase() === 'f') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
+    }
+  });
+  addEventListener('click', (e) => { if (e.clientX > innerWidth * 0.25) next(); else prev(); });
+  let x0 = null;
+  addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+    x0 = null;
+  });
+  addEventListener('resize', fit);
+
+  fit();
+  const start = parseInt(location.hash.slice(1), 10);
+  show(Number.isFinite(start) ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>

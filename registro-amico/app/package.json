@@ -1,0 +1,17 @@
+{
+  "name": "registro-amico",
+  "version": "0.1.0",
+  "private": true,
+  "description": "La palestra del registro elettronico: un registro di prova con un aiuto nella propria lingua che si adatta a chi impara.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}

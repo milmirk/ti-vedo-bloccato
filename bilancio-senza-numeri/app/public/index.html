@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF5EE">
+<meta name="description" content="I soldi che restano fino allo stipendio, mostrati come oggetti di tutti i giorni.">
+<title>Bilancio senza numeri</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237500C0'/%3E%3Cpath d='M22 16l20 16-20 16' stroke='%23fff' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+
+<header class="topbar">
+  <p class="brand"><span class="mark" aria-hidden="true">&gt;</span> Bilancio <b>senza numeri</b></p>
+  <p id="date-badge" class="badge" hidden></p>
+</header>
+
+<main id="main" tabindex="-1">
+  <noscript><p class="card">Per usare Bilancio senza numeri serve JavaScript attivo nel browser.</p></noscript>
+
+  <!-- Impostazione in tre passi -->
+  <section id="setup" class="screen" hidden aria-labelledby="step-title-1">
+    <p id="welcome" class="welcome">Ciao! Ti aiuto a vedere quanto ti resta fino ai prossimi soldi, <b>con le cose che compri</b> invece che con i numeri.</p>
+    <div class="progress-steps" aria-hidden="true"><span data-step="1"></span><span data-step="2"></span><span data-step="3"></span></div>
+    <p class="step-label" id="step-label">Passo uno di tre</p>
+
+    <div id="step-1" class="step-panel">
+      <h1 id="step-title-1" tabindex="-1">Quanti soldi hai fino al prossimo stipendio?</h1>
+      <p class="hint">Guarda il saldo nell'app della banca e scrivilo qui. Poi ti mostro tutto con gli oggetti.</p>
+      <p class="amount" aria-label="Cifra scritta"><span id="amount-display">0</span> <span class="cur">€</span></p>
+      <div class="keypad" role="group" aria-label="Tastierino">
+        <button type="button" class="key" data-key="1">1</button>
+        <button type="button" class="key" data-key="2">2</button>
+        <button type="button" class="key" data-key="3">3</button>
+        <button type="button" class="key" data-key="4">4</button>
+        <button type="button" class="key" data-key="5">5</button>
+        <button type="button" class="key" data-key="6">6</button>
+        <button type="button" class="key" data-key="7">7</button>
+        <button type="button" class="key" data-key="8">8</button>
+        <button type="button" class="key" data-key="9">9</button>
+        <button type="button" class="key" data-key="," aria-label="Virgola, per i centesimi">,</button>
+        <button type="button" class="key" data-key="0">0</button>
+        <button type="button" class="key back" data-key="back" aria-label="Cancella l'ultima cifra"><span aria-hidden="true">⌫</span></button>
+      </div>
+      <div class="preview" id="amount-preview" aria-live="polite" aria-atomic="true"></div>
+      <div class="actions">
+        <button type="button" class="btn primary wide" id="step1-next" disabled>Avanti</button>
+      </div>
+      <p class="demo-link" id="demo-link"><button type="button" class="btn link" id="load-demo">Prova con l'esempio di Marco</button></p>
+    </div>
+
+    <div id="step-2" class="step-panel" hidden>
+      <h1 id="step-title-2" tabindex="-1">Quando arrivano i prossimi soldi?</h1>
+      <p class="hint">Tocca il giorno sul calendario, oppure una scelta veloce.</p>
+      <div class="quick" role="group" aria-label="Scelte veloci">
+        <button type="button" class="chip" data-quick="27">Il 27 di ogni mese</button>
+        <button type="button" class="chip" data-quick="10">Il 10 di ogni mese</button>
+        <button type="button" class="chip" data-quick="31">L'ultimo giorno del mese</button>
+      </div>
+      <div class="calendar">
+        <div class="cal-head">
+          <button type="button" class="btn icon" id="cal-prev" aria-label="Mese prima"><span aria-hidden="true">‹</span></button>
+          <h2 id="cal-title" aria-live="polite"></h2>
+          <button type="button" class="btn icon" id="cal-next" aria-label="Mese dopo"><span aria-hidden="true">›</span></button>
+        </div>
+        <div class="cal-week" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span><span>D</span></div>
+        <div class="cal-grid" id="cal-grid" role="group" aria-labelledby="cal-title"></div>
+      </div>
+      <label class="check-row"><input type="checkbox" id="monthly" checked> <span>Ogni mese lo stesso giorno</span></label>
+      <p class="choice" id="payday-choice" aria-live="polite"></p>
+      <div class="actions">
+        <button type="button" class="btn" id="step2-back">Indietro</button>
+        <button type="button" class="btn primary" id="step2-next" disabled>Avanti</button>
+      </div>
+    </div>
+
+    <div id="step-3" class="step-panel" hidden>
+      <h1 id="step-title-3" tabindex="-1">Scegli i tuoi oggetti</h1>
+      <p class="hint">Scegli da tre a cinque cose che compri spesso: le userò al posto dei numeri. Se il prezzo per te è diverso, cambialo adesso.</p>
+      <ul class="unit-grid" id="unit-grid"></ul>
+      <p class="choice" id="units-count" aria-live="polite"></p>
+      <div class="actions">
+        <button type="button" class="btn" id="step3-back">Indietro</button>
+        <button type="button" class="btn primary" id="step3-done">Inizia</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Schermata principale -->
+  <div id="home" class="screen" hidden>
+    <section id="check" class="card check" hidden aria-labelledby="check-title"></section>
+
+    <section id="period-card" class="card period" aria-labelledby="period-title">
+      <h1 id="period-title" tabindex="-1"></h1>
+      <p class="sr-only" id="dots-label"></p>
+      <ol class="dots" id="dots" aria-hidden="true"></ol>
+      <p class="legend" aria-hidden="true"><span class="dot-mini oggi"></span> oggi <span class="dot-mini"></span> giorni da coprire <span class="pay-mini">💶</span> arrivano i soldi</p>
+    </section>
+
+    <section id="today-card" class="card today" aria-labelledby="today-title">
+      <h2 id="today-title"></h2>
+      <div id="today-body"></div>
+    </section>
+
+    <section id="remaining-card" class="card remaining" aria-labelledby="remaining-title">
+      <div id="remaining-body"></div>
+    </section>
+
+    <section id="days-card" class="card days" aria-labelledby="days-title" hidden>
+      <h2 id="days-title">Giorno per giorno</h2>
+      <ol class="day-rows" id="day-rows"></ol>
+      <p class="muted" id="more-days"></p>
+    </section>
+
+    <div id="tools" class="tools">
+      <button type="button" class="btn tool" id="btn-read"><span aria-hidden="true">🔊</span> <span id="read-label">Leggimelo</span></button>
+      <button type="button" class="btn tool switch" id="btn-euro" role="switch" aria-checked="false"><span class="knob" aria-hidden="true"></span> Mostra anche gli euro</button>
+    </div>
+
+    <section id="spend-card" class="card" aria-labelledby="spend-title">
+      <h2 id="spend-title" tabindex="-1">Ho preso…</h2>
+      <p class="hint">Tocca quello che hai preso: lo tolgo da quello che resta.</p>
+      <div class="spend-grid" id="spend-grid"></div>
+    </section>
+
+    <section id="altro" class="card altro" aria-labelledby="altro-title" hidden></section>
+
+    <section id="recent-card" class="card" aria-labelledby="recent-title">
+      <h2 id="recent-title">Ultime spese</h2>
+      <ol class="recent" id="recent"></ol>
+      <button type="button" class="btn" id="btn-undo">Annulla l'ultima spesa</button>
+    </section>
+
+    <section id="evidence-card" class="card evidence" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">Come lo capisci meglio</h2>
+      <div id="evidence-body"></div>
+      <button type="button" class="btn" id="btn-ask">Fammi una domanda adesso</button>
+    </section>
+
+    <section id="settings-card" class="card settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Impostazioni</h2>
+      <fieldset class="reps">
+        <legend>Come vuoi vedere i soldi</legend>
+        <div id="rep-options"></div>
+      </fieldset>
+      <div class="settings-actions">
+        <button type="button" class="btn" id="btn-new-period">Sono arrivati i nuovi soldi</button>
+        <button type="button" class="btn" id="btn-demo">Carica l'esempio di Marco</button>
+        <button type="button" class="btn danger" id="btn-reset">Cancella tutto e ricomincia</button>
+      </div>
+      <p class="muted small">I dati restano solo su questo dispositivo. L'app non dà consigli su come spendere: mostra i fatti.</p>
+    </section>
+  </div>
+</main>
+
+<div id="toast" class="toast" hidden>
+  <p id="toast-text"></p>
+  <button type="button" class="btn small on-dark" id="toast-undo">Annulla</button>
+</div>
+<div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

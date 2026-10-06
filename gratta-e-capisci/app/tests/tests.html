@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<title>Test della logica</title>
+</head>
+<body>
+<pre id="result">IN CORSO</pre>
+<!-- Mini test runner: nessuna dipendenza. Aggiungere sotto i moduli da testare e i file *.test.js. -->
+<script>
+  window.__tests = [];
+  function test(name, fn) { window.__tests.push({ name, fn }); }
+  function assertEqual(actual, expected, msg) {
+    const a = JSON.stringify(actual), e = JSON.stringify(expected);
+    if (a !== e) throw new Error((msg ? msg + ": " : "") + "atteso " + e + ", ottenuto " + a);
+  }
+  function assert(cond, msg) { if (!cond) throw new Error(msg || "asserzione falsa"); }
+</script>
+
+<!-- Moduli e test -->
+<script src="../data/giochi.js"></script>
+<script src="../data/quiz.js"></script>
+<script src="../src/motore.js"></script>
+<script src="motore.test.js"></script>
+<script src="testi.test.js"></script>
+
+<script>
+  window.addEventListener("load", () => {
+    const lines = []; let pass = 0, fail = 0;
+    for (const t of window.__tests) {
+      try { t.fn(); pass++; lines.push("ok   " + t.name); }
+      catch (err) { fail++; lines.push("FAIL " + t.name + " -> " + err.message); }
+    }
+    document.getElementById("result").textContent =
+      lines.join("\n") + "\nRISULTATO: " + pass + " passati, " + fail + " falliti";
+  });
+</script>
+</body>
+</html>

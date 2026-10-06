@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SECCI Lens · Hagenthon</title>
+<style>
+  :root {
+    --p: #A100FF;
+    --p2: #7500C0;
+    --p3: #460073;
+    --pl: #BE82FF;
+    --pll: #DCAFFF;
+    --rose: #FF50A0;
+    --ok: #4ADE80;
+    --t1: rgba(255,255,255,0.92);
+    --t2: rgba(255,255,255,0.62);
+    --t3: rgba(255,255,255,0.38);
+    --line: rgba(255,255,255,0.12);
+    --ease: cubic-bezier(.2,.7,.2,1);
+    --pa: #0066CC;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden; }
+  body { font-family: "Graphik", "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+  .stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; }
+
+  .slide {
+    position: absolute; inset: 0; padding: 120px 150px 110px; display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden; transition: opacity .7s var(--ease), visibility .7s;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+
+  .r { opacity: 0; transform: translateY(46px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: calc(var(--d, 0) * 110ms); }
+  .slide.active .r { opacity: 1; transform: none; }
+  .frag { opacity: 0; transform: translateY(28px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .frag.on { opacity: 1; transform: none; }
+
+  .glow { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; background: radial-gradient(circle, rgba(161,0,255,.32), rgba(161,0,255,0) 62%); pointer-events: none; filter: blur(10px); }
+  .bigmark {
+    position: absolute; right: -60px; bottom: -260px; font-size: 1500px; line-height: 1; font-weight: 800;
+    background: linear-gradient(160deg, rgba(161,0,255,.55), rgba(70,0,115,0) 70%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; pointer-events: none; user-select: none;
+  }
+
+  .eyebrow { font-size: 22px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--pl); }
+  h1 { font-size: 190px; line-height: .95; letter-spacing: -.045em; margin: 34px 0 0; font-weight: 800; }
+  h2 { font-size: 88px; line-height: 1.02; letter-spacing: -.035em; margin: 26px 0 0; font-weight: 750; }
+  h3 { font-size: 38px; margin: 0; letter-spacing: -.015em; font-weight: 700; }
+  p { margin: 0; }
+  .gt { color: var(--p); }
+  .grad { background: linear-gradient(90deg, var(--pll), var(--p)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 40px; line-height: 1.35; color: var(--t2); max-width: 1300px; }
+  .lead b { color: #fff; }
+  .muted { color: var(--t2); }
+  .small { font-size: 24px; color: var(--t3); }
+  .spacer { flex: 1; }
+
+  .card { border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 28px; padding: 42px; }
+  .card.hot { border-color: rgba(161,0,255,.55); background: linear-gradient(160deg, rgba(161,0,255,.18), rgba(161,0,255,.03)); }
+  .card p.desc { font-size: 28px; line-height: 1.35; color: var(--t2); margin-top: 18px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+
+  .stat { font-size: 112px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+  .stat small { font-size: 40px; font-weight: 600; color: var(--pl); letter-spacing: 0; }
+
+  /* Persona */
+  .persona { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 40px; align-items: start; }
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+  .facts li { font-size: 34px; line-height: 1.35; color: var(--t1); padding-left: 44px; position: relative; }
+  .facts li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .facts li b { color: #fff; }
+  .goal { font-size: 26px; letter-spacing: .25em; text-transform: uppercase; color: var(--pl); font-weight: 700; }
+
+  /* Punti di blocco */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 56px; }
+  .wall .card { padding: 34px; display: flex; flex-direction: column; }
+  .wall .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .wall h3 { font-size: 36px; margin-top: 12px; }
+  .wall p { font-size: 25px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .mini { margin-top: auto; border-radius: 14px; background: #fff; color: #19191a; padding: 18px; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; }
+  .wall p + .mini { margin-top: 24px; }
+  .mini .lbl { font-size: 18px; font-weight: 700; color: #17324d; }
+  .mini .in { font-family: Consolas, monospace; font-size: 18px; border-bottom: 2px solid #d9364f; background: #fdf1f3; padding: 6px 8px; margin-top: 6px; }
+  .mini .err { color: #d9364f; font-size: 17px; margin-top: 6px; }
+  .mini .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+  .mini .cal i { height: 22px; background: #eceef0; border-radius: 3px; }
+  .mini .calhead { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
+  .mini .calhead span { color: #b1b8bf; font-weight: 400; font-size: 14px; }
+  .mini .dis { display: inline-block; background: #e3e4e6; color: #9aa5b1; font-weight: 700; font-size: 18px; padding: 10px 16px; }
+  .mini .clic { display: block; color: var(--rose); font-weight: 800; font-size: 18px; margin-top: 8px; }
+  .mini .tabs { display: flex; gap: 6px; }
+  .mini .tabs span { flex: 1; font-size: 15px; padding: 8px 10px; border-radius: 8px 8px 0 0; background: #eceef0; color: #5c6f82; }
+  .mini .tabs span.on { background: var(--pa); color: #fff; }
+
+  /* Mercato */
+  .quad { display: grid; grid-template-columns: 240px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 20px; margin-top: 40px; }
+  .quad .ax { font-size: 20px; letter-spacing: .2em; text-transform: uppercase; color: var(--t3); font-weight: 700; display: flex; align-items: center; line-height: 1.4; }
+  .quad .ax.c { justify-content: center; }
+  .quad .card { padding: 30px 36px; }
+  .quad .card b { font-size: 34px; display: block; }
+  .quad .card span { display: block; font-size: 24px; color: var(--t2); margin-top: 10px; line-height: 1.35; }
+  .quad .card .tag { font-size: 17px; letter-spacing: .15em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin: 0 0 10px; }
+  .quad .hot .tag { color: var(--pll); }
+
+  /* Ciclo */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 70px; }
+  .step { border-radius: 26px; padding: 34px; border: 1px solid var(--line); background: rgba(255,255,255,.035); position: relative; }
+  .step .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .step h3 { margin-top: 14px; font-size: 34px; }
+  .step p { font-size: 27px; line-height: 1.35; color: var(--t2); margin-top: 16px; }
+  .step p b { color: #fff; }
+  .step.bad { border-color: rgba(255,80,160,.7); background: rgba(255,80,160,.08); }
+  .step.good { border-color: rgba(74,222,128,.7); background: rgba(74,222,128,.07); }
+  .step.hotstep { border-color: rgba(161,0,255,.6); background: rgba(161,0,255,.1); }
+  .mono { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 24px; background: rgba(0,0,0,.4); border-radius: 12px; padding: 14px 16px; margin-top: 18px; color: #fff; line-height: 1.4; }
+  .x { color: var(--rose); font-weight: 800; }
+  .v { color: var(--ok); font-weight: 800; }
+
+  /* Prima e dopo: replica della pagina */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 26px; align-items: start; }
+  .ba .lab { font-size: 22px; letter-spacing: .3em; text-transform: uppercase; font-weight: 700; color: var(--t3); margin-bottom: 16px; }
+  .ba .lab.after { color: var(--pll); }
+  .page { background: #fff; color: #19191a; border-radius: 18px; overflow: hidden; font-family: "Titillium Web", "Segoe UI", Arial, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .page .bar { background: var(--pa); color: #fff; font-weight: 700; font-size: 20px; padding: 12px 24px; }
+  .page .body { padding: 16px 28px 18px; }
+  .page .count { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #5c6f82; }
+  .page .h { font-size: 28px; font-weight: 700; color: #17324d; margin: 2px 0 12px; }
+  .page .alert { border-left: 4px solid #d9364f; background: #fdf1f3; color: #8a1c2b; padding: 6px 12px; font-size: 16px; margin-bottom: 10px; }
+  .page .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
+  .page .f .l { font-size: 16px; font-weight: 700; color: #17324d; }
+  .page .f .i { border-bottom: 1px solid #5c6f82; height: 30px; font-family: Consolas, monospace; font-size: 16px; padding: 5px 4px 0; }
+  .page .f.bad .i { border-bottom: 2px solid #d9364f; background: #fdf1f3; }
+  .page .f .e { color: #d9364f; font-size: 14px; height: 18px; margin-top: 3px; }
+  .page .btns { display: flex; justify-content: space-between; margin-top: 16px; }
+  .page .btns span { border: 2px solid var(--pa); color: var(--pa); font-weight: 700; font-size: 17px; padding: 7px 20px; }
+  .page .btns span.pri { background: var(--pa); color: #fff; }
+  .tvb { margin: 14px 0 2px; border: 2px solid var(--p3); border-left-width: 6px; border-radius: 12px; padding: 12px 16px; font-family: system-ui, "Segoe UI", Arial, sans-serif; box-shadow: 0 6px 20px rgba(10,0,20,.12); }
+  .tvb .t { font-weight: 700; color: var(--p3); font-size: 17px; }
+  .tvb .t .gt { font-size: 21px; margin-right: 6px; }
+  .tvb .tx { font-size: 18px; line-height: 1.42; margin-top: 4px; color: #1a1a1a; }
+  .tvb .acts { display: flex; gap: 8px; margin-top: 10px; }
+  .tvb .acts span { border: 2px solid var(--p3); color: var(--p3); border-radius: 8px; font-weight: 700; font-size: 14px; padding: 5px 12px; }
+  .tvb .acts span.pri { background: var(--p); border-color: var(--p); color: #fff; }
+  .ba .cap { font-size: 25px; color: var(--t2); margin-top: 14px; line-height: 1.32; }
+  .ba .cap b { color: #fff; }
+
+  /* Segnali */
+  .sig { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 48px; }
+  .sig .card { padding: 26px 30px; }
+  .sig .when { font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--pll); font-weight: 700; }
+  .sig h3 { font-size: 30px; margin-top: 10px; }
+  .sig p { font-size: 23px; color: var(--t2); line-height: 1.35; margin-top: 10px; }
+
+  /* Architettura */
+  .arch { position: relative; margin-top: 40px; height: 610px; }
+  .node { position: absolute; border-radius: 26px; padding: 26px 30px; width: 400px; }
+  .node .k { font-size: 18px; letter-spacing: .25em; text-transform: uppercase; font-weight: 700; }
+  .node b { display: block; font-size: 36px; margin-top: 8px; }
+  .node span { display: block; font-size: 23px; color: var(--t2); margin-top: 8px; line-height: 1.3; }
+  .node.ai { border: 2px solid var(--p); background: #1b0a2b; }
+  .node.ai .k { color: var(--pl); }
+  .node.code { border: 2px dashed rgba(255,255,255,.55); background: #0e0e10; }
+  .node.code .k { color: rgba(255,255,255,.7); }
+  .node.ui { border: 2px solid #fff; background: #fff; color: #000; }
+  .node.ui .k { color: var(--p2); }
+  .node.ui span { color: #333; }
+  .arch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .arch path { fill: none; stroke: rgba(190,130,255,.7); stroke-width: 3; stroke-dasharray: 10 10; }
+  .slide.active .arch path { animation: dash 1.6s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -40; } }
+
+  /* Liste a colonne */
+  .cols3 h3 { font-size: 36px; }
+  .cols3 ul { list-style: none; padding: 0; margin: 22px 0 0; }
+  .cols3 li { font-size: 28px; line-height: 1.35; color: var(--t1); padding-left: 34px; position: relative; margin-bottom: 16px; }
+  .cols3 li::before { content: "›"; position: absolute; left: 0; color: var(--p); font-weight: 800; }
+  .cols3 ul.no li::before { content: "×"; color: var(--rose); }
+
+  .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; }
+  .feat .card { padding: 28px 32px; }
+  .feat .ic { font-size: 48px; font-weight: 800; color: var(--p); line-height: 1; height: 54px; }
+  .feat h3 { margin-top: 12px; font-size: 32px; }
+  .feat p { font-size: 24px; color: var(--t2); line-height: 1.35; margin-top: 12px; }
+
+  .tree { font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 25px; line-height: 1.55; color: var(--t1); white-space: pre; }
+  .tree .c { color: var(--t3); }
+  .tree .h { color: var(--pl); font-weight: 700; }
+  table.rev { width: 100%; border-collapse: collapse; font-size: 24px; }
+  table.rev th { text-align: left; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: var(--pl); padding: 0 18px 14px 0; font-weight: 700; }
+  table.rev td { padding: 14px 18px 14px 0; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.32; color: var(--t1); }
+  table.rev td:first-child { font-weight: 700; white-space: nowrap; }
+
+  .demo { counter-reset: d; display: grid; grid-template-columns: 1fr 1fr; gap: 26px 60px; margin-top: 60px; }
+  .demo li { list-style: none; font-size: 34px; line-height: 1.3; display: grid; grid-template-columns: 76px 1fr; align-items: start; }
+  .demo li::before { counter-increment: d; content: counter(d); font-size: 30px; font-weight: 800; color: #000; background: var(--p); border-radius: 50%; width: 54px; height: 54px; display: grid; place-items: center; }
+  .demo li span { display: block; font-size: 25px; color: var(--t2); margin-top: 6px; }
+  .url { font-family: "Cascadia Code", Consolas, monospace; font-size: 26px; color: var(--pll); }
+
+  .closing h2 { font-size: 120px; }
+
+  .progress { position: fixed; left: 0; top: 0; height: 5px; width: 100%; background: rgba(255,255,255,.06); z-index: 10; }
+  .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--p2), var(--p)); transition: width .5s var(--ease); }
+  .hud { position: fixed; right: 28px; bottom: 20px; font-size: 14px; letter-spacing: .2em; color: rgba(255,255,255,.4); z-index: 10; font-variant-numeric: tabular-nums; }
+  .brandbar { position: absolute; left: 150px; right: 150px; bottom: 44px; display: flex; justify-content: space-between; font-size: 18px; letter-spacing: .25em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+  .brandbar b { color: rgba(255,255,255,.55); font-weight: 700; }
+  .help { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); font-size: 13px; color: rgba(255,255,255,.4); z-index: 10; letter-spacing: .05em; transition: opacity .6s; }
+  .help.gone { opacity: 0; }
+  @media print { .progress, .hud, .help { display: none; } }
+
+  /* ── SECCI Lens: stili delle slide di questa demo ── */
+  .wall .mini.doc { margin-top: 22px; font-family: Georgia, "Times New Roman", serif; }
+  .mini.doc .lbl { font-family: Arial, "Segoe UI", sans-serif; font-size: 18px; line-height: 1.3; }
+  .mini.doc .tx { font-size: 18px; line-height: 1.42; color: #2a2a2a; margin-top: 8px; }
+  .wall .ask { margin-top: 22px; font-size: 30px; font-weight: 800; color: var(--rose); }
+
+  .paper { background: #fff; color: #1a1a1a; border-radius: 18px; padding: 26px 32px 22px; font-family: Georgia, "Times New Roman", serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .paper .ttl { font-family: Arial, "Segoe UI", sans-serif; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: #555; }
+  .paper .sec { font-family: Arial, "Segoe UI", sans-serif; font-weight: 700; font-size: 21px; margin-top: 12px; }
+  .paper p { font-size: 19px; line-height: 1.45; margin-top: 10px; }
+
+  .lens { background: #fff; color: #16111d; border-radius: 18px; padding: 24px 28px; font-family: "Segoe UI", system-ui, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .lens .tiles4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lens .tl { border: 1px solid #ddd3e8; border-radius: 12px; padding: 12px 16px; }
+  .lens .tl small { display: block; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #4a4352; }
+  .lens .tl b { display: block; font-size: 36px; letter-spacing: -.02em; margin-top: 2px; }
+  .lens .tl.hot { background: var(--p3); border-color: var(--p3); color: #fff; }
+  .lens .tl.hot small { color: rgba(255,255,255,.85); }
+  .lens .zero { margin-top: 14px; border-left: 6px solid var(--p); background: #f3e7ff; border-radius: 10px; padding: 12px 16px; font-size: 19px; line-height: 1.4; }
+  .lens .srcline { margin-top: 12px; font-size: 17px; color: var(--p2); font-weight: 700; }
+
+  .calc { display: grid; grid-template-columns: 1fr 70px 1fr 70px 1.25fr 70px 1fr; align-items: stretch; margin-top: 40px; }
+  .calc .card { padding: 30px 30px; display: flex; flex-direction: column; }
+  .calc .n { font-size: 20px; letter-spacing: .25em; text-transform: uppercase; color: var(--t3); font-weight: 700; }
+  .calc .hot .n { color: var(--pll); }
+  .calc b { font-size: 56px; letter-spacing: -.03em; margin-top: 8px; }
+  .calc span:last-child { font-size: 23px; color: var(--t2); margin-top: 10px; line-height: 1.35; }
+  .calc .op { display: grid; place-items: center; font-size: 64px; font-weight: 800; color: var(--p); }
+
+  .qz { margin: 0; padding: 0; list-style: none; counter-reset: q; display: grid; gap: 22px; }
+  .qz li { counter-increment: q; font-size: 29px; line-height: 1.35; color: var(--t2); position: relative; padding-left: 72px; min-height: 50px; }
+  .qz li::before { content: counter(q); position: absolute; left: 0; top: -4px; width: 50px; height: 50px; border-radius: 50%; background: var(--p); color: #000; font-weight: 800; display: grid; place-items: center; font-size: 26px; }
+  .qz li b { color: #fff; }
+  .meter2 { display: grid; grid-template-columns: 260px 1fr 110px; gap: 18px; align-items: center; margin-top: 26px; font-size: 26px; }
+  .meter2 i { display: block; height: 26px; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .meter2 em { display: block; height: 100%; background: rgba(255,255,255,.4); }
+  .meter2.after em { background: linear-gradient(90deg, var(--p2), var(--p)); }
+  .meter2 b { font-size: 28px; text-align: right; }
+</style>
+</head>
+<body>
+<div class="progress"><span id="bar"></span></div>
+<div class="hud" id="hud"></div>
+<div class="help">← → per navigare · F schermo intero</div>
+
+<div class="deck">
+<div class="stage" id="stage">
+
+  <!-- 1 · Titolo -->
+  <section class="slide" data-title="Titolo">
+    <div class="glow" style="left:-400px; top:-500px"></div>
+    <div class="bigmark">&gt;</div>
+    <div class="spacer"></div>
+    <span class="eyebrow r" style="--d:1">Hagenthon · Tema 02 · Inclusione finanziaria</span>
+    <h1 class="r" style="--d:2">SECCI<br>Lens<span class="gt">&gt;</span></h1>
+    <p class="lead r" style="--d:4; margin-top:46px; max-width:1250px">Legge il modulo di un finanziamento, <b>rifà i conti</b> con i suoi numeri e te lo spiega <b>in parole semplici</b>. Prima che tu firmi.</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span>github.com/milmirk/ti-vedo-bloccato/tree/main/secci-lens</span></div>
+  </section>
+
+  <!-- 2 · Problema -->
+  <section class="slide" data-title="Il problema">
+    <span class="eyebrow r">Il problema</span>
+    <h2 class="r" style="--d:1">«Tasso zero».<br><span class="grad">Ma il credito non costa zero.</span></h2>
+    <div class="grid3" style="margin-top:56px">
+      <div class="card r" style="--d:3"><div class="stat">0,00<small>%</small></div><p class="desc"><b style="color:#fff">TAN</b>, il numero grande sul cartellino del negozio: niente interessi.</p></div>
+      <div class="card r" style="--d:4"><div class="stat">14,19<small>%</small></div><p class="desc"><b style="color:#fff">TAEG</b>, scritto nel modulo SECCI: comprende anche le spese.</p></div>
+      <div class="card hot r" style="--d:5"><div class="stat">36<small> € in più</small></div><p class="desc">Istruttoria, imposta di bollo, incasso rata. Il modulo non li somma.</p></div>
+    </div>
+    <p class="lead r" style="--d:7; margin-top:48px; font-size:36px">Il modulo SECCI è obbligatorio e uguale in tutta Europa. È scritto per essere <b>completo</b>, non per essere <b>capito</b>.</p>
+    <p class="small r" style="--d:8; margin-top:20px">Numeri del documento di esempio della demo: finanziatore di fantasia, voci e formato di un SECCI italiano.</p>
+  </section>
+
+  <!-- 3 · Persona -->
+  <section class="slide" data-title="Persona">
+    <div class="glow" style="right:-600px; top:-300px"></div>
+    <span class="eyebrow r">User difficulty statement</span>
+    <div class="persona">
+      <div>
+        <h2 class="r" style="--d:1; margin-top:0; font-size:112px">Samira,<br><span class="grad">41 anni.</span></h2>
+        <p class="lead r" style="--d:3; margin-top:40px">Lavora, gestisce le spese di casa. Ha poca dimestichezza con i termini finanziari. Le si è rotta la <b>lavatrice</b>.</p>
+      </div>
+      <div>
+        <p class="goal r" style="--d:2">Cosa le succede</p>
+        <ul class="facts r" style="--d:4; margin-top:26px">
+          <li>In negozio le propongono una lavatrice da 600 € <b>«a tasso zero»</b>, in 10 rate.</li>
+          <li>Le danno il SECCI: quattro sezioni, parole come TAEG, istruttoria, imputazione.</li>
+          <li>Non sa <b>quanto restituirà in tutto</b>, né perché il TAEG non è zero.</li>
+          <li>Oggi l'alternativa è firmare sulla fiducia, o chiedere a qualcuno di leggerlo per lei.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Il muro -->
+  <section class="slide" data-title="Cosa legge">
+    <span class="eyebrow r">La barriera</span>
+    <h2 class="r" style="--d:1">Cosa legge Samira.</h2>
+    <div class="wall">
+      <div class="card r" style="--d:2">
+        <span class="n">Sezione 2</span><h3>Le rate</h3>
+        <div class="mini doc"><div class="lbl">Rate ed, eventualmente, loro ordine di imputazione</div><div class="tx">10 rate mensili da 60,00 €… I pagamenti sono imputati prima alle spese, poi agli interessi e infine al capitale.</div></div>
+        <p class="ask">«Imputati»?</p>
+      </div>
+      <div class="card r" style="--d:3">
+        <span class="n">Sezione 2</span><h3>Il totale</h3>
+        <div class="mini doc"><div class="lbl">Importo totale dovuto dal consumatore</div><div class="tx">Importo del capitale preso in prestito, più gli interessi e i costi connessi al credito: 636,00 €</div></div>
+        <p class="ask">600 o 636?</p>
+      </div>
+      <div class="card r" style="--d:4">
+        <span class="n">Sezione 3</span><h3>Il TAEG</h3>
+        <div class="mini doc"><div class="lbl">Tasso annuo effettivo globale (TAEG)</div><div class="tx">Costo totale del credito espresso in percentuale, calcolata su base annua, dell'importo totale del credito.</div></div>
+        <p class="ask">Non era a tasso zero?</p>
+      </div>
+      <div class="card hot r" style="--d:5">
+        <span class="n">Sezione 3</span><h3>Le spese</h3>
+        <div class="mini doc"><div class="lbl">Costi connessi</div><div class="tx">Spese di istruttoria: 10,00 €, addebitate sulla prima rata. Imposta di bollo sul contratto: 16,00 €. Spese di incasso rata: 1,00 € per ogni rata.</div></div>
+        <p class="ask">Quanto, in tutto?</p>
+      </div>
+    </div>
+    <p class="lead r" style="--d:7; margin-top:40px; font-size:34px">Tutte le informazioni ci sono. <b>Il conto finale no</b>: deve farlo lei.</p>
+  </section>
+
+  <!-- 5 · Prima e dopo -->
+  <section class="slide" data-title="Prima e dopo">
+    <span class="eyebrow r">Before / after simplicity evidence</span>
+    <h2 class="r" style="--d:1; font-size:72px">Stesso documento, <span class="grad">quattro numeri chiari.</span></h2>
+    <div class="ba">
+      <div class="r" style="--d:2">
+        <div class="lab">Prima · il SECCI</div>
+        <div class="paper">
+          <div class="ttl">Informazioni europee di base sul credito ai consumatori</div>
+          <div class="sec">3. Costi del credito</div>
+          <p>Tasso fisso. TAN (tasso annuo nominale): 0,00%</p>
+          <p><b>Tasso annuo effettivo globale (TAEG)</b> Costo totale del credito espresso in percentuale, calcolata su base annua, dell'importo totale del credito. Il TAEG consente al consumatore di confrontare le varie offerte. TAEG: 14,19%</p>
+          <p>Spese di istruttoria: 10,00 €, addebitate sulla prima rata · Imposta di bollo sul contratto: 16,00 €, addebitata sulla prima rata · Spese di incasso rata: 1,00 € per ogni rata</p>
+        </div>
+        <p class="cap">Tutto scritto, niente sommato. <b>Samira firma senza sapere quanto paga.</b></p>
+      </div>
+      <div class="frag">
+        <div class="lab after">Dopo · con SECCI Lens</div>
+        <div class="lens">
+          <div class="tiles4">
+            <div class="tl"><small>Ricevi</small><b>600,00 €</b></div>
+            <div class="tl"><small>Restituisci in totale</small><b>636,00 €</b></div>
+            <div class="tl hot"><small>Il credito ti costa</small><b>36,00 €</b></div>
+            <div class="tl"><small>Per quanto tempo</small><b>10 mesi</b></div>
+          </div>
+          <div class="zero"><b>«Tasso zero» vuol dire TAN 0,00%: niente interessi.</b> Ma ci sono 36,00 € di spese obbligatorie. Per questo il TAEG non è zero: calcolato dai dati del documento è 14,19%.</div>
+          <div class="srcline">› Dal documento: «Importo totale dovuto dal consumatore … 636,00 €»</div>
+        </div>
+        <p class="cap">Ogni numero ha accanto <b>la frase originale</b>. E 36 € sono <b>30 caffè al bar</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Soluzione -->
+  <section class="slide" data-title="La soluzione">
+    <div class="glow" style="left:20%; top:-800px"></div>
+    <span class="eyebrow r">La soluzione</span>
+    <h2 class="r" style="--d:1">Legge. Calcola. Controlla.<br><span class="grad">Spiega senza consigliare.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Legge</span><h3>Le voci del SECCI</h3><p>Importo, durata, rate, TAN, TAEG, spese. <b>Ogni valore con il suo brano</b> del documento.</p></div>
+      <div class="step r" style="--d:4"><span class="n">2 · Calcola</span><h3>Come la direttiva</h3><p>TAEG con la formula della direttiva 2008/48/CE, piano delle rate, <b>costo del credito</b>.</p></div>
+      <div class="step hotstep r" style="--d:5"><span class="n">3 · Controlla</span><h3>I conti tornano?</h3><p>Rifà TAEG e totale dai numeri del documento. Se non coincidono, <b>lo dice in modo neutro</b>.</p></div>
+      <div class="step r" style="--d:6"><span class="n">4 · Spiega</span><h3>Con le sue parole</h3><p>Frase per frase, in cose di tutti i giorni, con un confronto neutro e un <b>micro-quiz</b>.</p></div>
+    </div>
+    <p class="lead r" style="--d:8; margin-top:46px; font-size:34px">Una pagina web che usa la persona, da sola. <b>Funziona anche senza AI.</b></p>
+    <p class="small r" style="--d:9; margin-top:22px; max-width:1600px">Verifica di mercato (5 ottobre 2026): i calcolatori di rata chiedono i numeri a mano e non spiegano; la guida di Banca d'Italia «Il credito ai consumatori in parole semplici» è statica; i comparatori (Facile.it, Segugio) mettono le offerte in classifica; i lettori AI di documenti esistono per i finanziatori (es. TurnKey Lender). Non abbiamo trovato uno strumento per il consumatore che legga un SECCI italiano e lo spieghi.</p>
+  </section>
+
+  <!-- 7 · Architettura -->
+  <section class="slide" data-title="Architettura agentica">
+    <span class="eyebrow r">Struttura agentica</span>
+    <h2 class="r" style="--d:1">Il codice calcola. <span class="grad">L'AI spiega.</span></h2>
+    <div class="arch r" style="--d:2">
+      <svg viewBox="0 0 1620 610" preserveAspectRatio="none">
+        <path d="M400 110 L610 110" />
+        <path d="M1010 110 L1220 110" />
+        <path d="M200 236 L200 360" />
+        <path d="M400 470 L610 470" />
+        <path d="M1220 470 L1010 470" />
+        <path d="M810 360 L810 236" />
+        <path d="M1420 236 L1420 360" />
+      </svg>
+      <div class="node code" style="left:0; top:20px"><span class="k">Codice · browser</span><b>Parser</b><span>Etichette standard del SECCI → valore + brano originale.</span></div>
+      <div class="node code" style="left:610px; top:20px"><span class="k">Codice · browser</span><b>Finanza</b><span>TAEG (direttiva 2008/48/CE), piano rate, coerenza.</span></div>
+      <div class="node ui" style="left:1220px; top:20px"><span class="k">Interfaccia</span><b>Pagina di Samira</b><span>Sintesi, TAN e TAEG, rate, cose, controllo, quiz.</span></div>
+      <div class="node ai" style="left:0; top:360px"><span class="k">Agente AI · facoltativo</span><b>Extract agent</b><span>Solo per testi non standard: copia brani, non calcola.</span></div>
+      <div class="node code" style="left:610px; top:360px"><span class="k">Codice · server e browser</span><b>Validatore</b><span>Citazioni verbatim, numeri ammessi, filtro dei consigli.</span></div>
+      <div class="node ai" style="left:1220px; top:360px"><span class="k">Agente AI · facoltativo</span><b>Explain agent</b><span>«Spiegamelo in parole semplici», frase per frase.</span></div>
+    </div>
+    <p class="r" style="--d:5; font-size:36px; font-weight:700; margin-top:30px">Claude Opus 5.5 · effort basso · JSON da schema. <span class="grad">Nessun numero nasce dall'AI.</span></p>
+  </section>
+
+  <!-- 8 · Il controllo -->
+  <section class="slide" data-title="Il controllo">
+    <span class="eyebrow r">Semplificare senza tradire</span>
+    <h2 class="r" style="--d:1">Se l'AI scrive un numero che non c'è,<br><span class="grad">a Samira non arriva.</span></h2>
+    <div class="loop">
+      <div class="step r" style="--d:3"><span class="n">1 · Explain agent</span><h3>Scrive</h3><div class="mono">“In tutto restituisci <span class="x">642,00 €</span>.”</div></div>
+      <div class="step bad frag"><span class="n">2 · Validatore</span><h3><span class="x">✗</span> Scarta</h3><div class="mono">642,00 non è nel documento né nei calcoli.</div></div>
+      <div class="step frag"><span class="n">3 · Regole</span><h3>Restano</h3><p>Samira ha già davanti le frasi a regole, con i numeri del codice. <b>Nessuna attesa.</b></p></div>
+      <div class="step good frag"><span class="n">4 · Samira</span><h3><span class="v">✓</span> Legge</h3><p>Solo numeri che ritrova nel documento, <b>con la frase originale accanto</b>.</p></div>
+    </div>
+    <p class="lead r" style="--d:5; margin-top:56px">Una frase con «ti conviene», «è meglio», «scegli» o «dovresti» fa scartare <b>tutta la risposta</b>. Anche le citazioni devono comparire nel documento, parola per parola.</p>
+  </section>
+
+  <!-- 9 · I numeri passo per passo -->
+  <section class="slide" data-title="I numeri passo per passo">
+    <span class="eyebrow r">Before / after · il calcolo</span>
+    <h2 class="r" style="--d:1">Da «tasso zero» a <span class="grad">36 € in più.</span></h2>
+    <div class="calc">
+      <div class="card r" style="--d:2"><span class="n">Ricevi</span><b>600,00 €</b><span>Importo totale del credito</span></div>
+      <div class="op r" style="--d:2">+</div>
+      <div class="card r" style="--d:3"><span class="n">Interessi</span><b>0,00 €</b><span>10 × 60,00 € − 600,00 €</span></div>
+      <div class="op r" style="--d:3">+</div>
+      <div class="card r" style="--d:4"><span class="n">Spese</span><b>36,00 €</b><span>10,00 istruttoria + 16,00 bollo + 10 × 1,00 incasso</span></div>
+      <div class="op r" style="--d:4">=</div>
+      <div class="card hot r" style="--d:5"><span class="n">Restituisci</span><b>636,00 €</b><span>coincide con il documento</span></div>
+    </div>
+    <div class="grid2 r" style="--d:6; margin-top:28px; grid-template-columns: 1.25fr .75fr">
+      <div class="card"><h3>TAEG, come vuole la direttiva</h3><div class="mono" style="font-size:23px">600,00 = 87,00 ÷ (1+X)<sup>1/12</sup> + 61,00 ÷ (1+X)<sup>2/12</sup> + … + 61,00 ÷ (1+X)<sup>10/12</sup></div><p class="desc">Il programma trova <b style="color:#fff">X = 14,19%</b>: lo stesso numero scritto nel documento. Prima rata più alta: dentro ci sono istruttoria e bollo.</p></div>
+      <div class="card hot"><h3>In cose di tutti i giorni</h3><p class="stat" style="font-size:80px; margin-top:10px">30<small> caffè</small></p><p class="desc">36,00 € ÷ 1,20 € = 30. Oppure 4 pizze e mezza. Prezzi modificabili.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 · Quiz -->
+  <section class="slide" data-title="Quiz">
+    <span class="eyebrow r">Comprensione</span>
+    <h2 class="r" style="--d:1">Quattro domande, <span class="grad">prima e dopo.</span></h2>
+    <div class="grid2" style="margin-top:50px; grid-template-columns: 1.1fr .9fr; align-items:start">
+      <ol class="qz r" style="--d:2">
+        <li>Il documento scrive TAN 0,00% e TAEG 14,19%. <b>Quale dei due comprende anche le spese?</b></li>
+        <li><b>Alla fine, quanto restituisci in tutto?</b> 60,00 € · 600,00 € · 636,00 €</li>
+        <li><b>Cosa c'è dentro il TAEG?</b> Interessi e spese obbligatorie · solo gli interessi · il prezzo del bene</li>
+        <li><b>Quanto ti costa il credito?</b> 0,00 € · 636,00 € · 36,00 €</li>
+      </ol>
+      <div class="card r" style="--d:4">
+        <h3>Come si misura</h3>
+        <div class="meter2"><span>Prima di leggere</span><i><em style="width:25%"></em></i><b>1 su 4</b></div>
+        <div class="meter2 after"><span>Dopo la spiegazione</span><i><em style="width:100%"></em></i><b>4 su 4</b></div>
+        <p class="desc">Le domande usano i numeri del documento della persona. Dopo ogni risposta: perché, e dove lo trova nel modulo.</p>
+        <p class="small" style="margin-top:18px">Valori di esempio da una prova interna della demo, non uno studio con utenti. Il punteggio resta nella pagina: non viene salvato né inviato.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · Rischio e chiarezza -->
+  <section class="slide" data-title="Rischio e chiarezza">
+    <span class="eyebrow r">Risk &amp; clarity note</span>
+    <h2 class="r" style="--d:1">Più semplice.<br><span class="grad">Non diverso. Non un consiglio.</span></h2>
+    <div class="grid3 cols3" style="margin-top:50px">
+      <div class="card r" style="--d:2"><h3>Semplificato</h3><ul>
+        <li>Quattro numeri, in euro</li>
+        <li>TAN, TAEG, istruttoria in parole comuni</li>
+        <li>Il costo in caffè, pizze, pieni</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Non alterato</h3><ul>
+        <li>Ogni valore ha accanto il suo brano</li>
+        <li>Documento originale sempre consultabile</li>
+        <li>Nessun numero corretto: le differenze si mostrano</li>
+      </ul></div>
+      <div class="card hot r" style="--d:4"><h3>Nessun consiglio</h3><ul>
+        <li>Confronto solo con fatti, senza classifiche</li>
+        <li>Filtro dei consigli, con test</li>
+        <li>«Puoi chiedere chiarimenti al finanziatore»</li>
+      </ul></div>
+    </div>
+    <p class="lead r" style="--d:6; margin-top:40px; font-size:28px; max-width:1620px">Ambiguità evitate: <b>ogni ipotesi di calcolo è scritta e visibile</b> (quando si pagano le spese, mese = 1/12 di anno).</p>
+  </section>
+
+  <!-- 12 · Come l'abbiamo costruito -->
+  <section class="slide" data-title="Come l'abbiamo costruito">
+    <span class="eyebrow r">Come l'abbiamo costruito</span>
+    <h2 class="r" style="--d:1">Agentic coding, con revisione umana.</h2>
+    <div class="grid2" style="margin-top:46px; grid-template-columns: .74fr 1.26fr; align-items:start">
+      <div class="card r" style="--d:2; padding:34px 38px"><div class="tree"><span class="h">agents/</span>
+├─ CLAUDE.md
+├─ workflow.md
+├─ <span class="h">prompts/</span>  <span class="c"># letti dal server</span>
+│  ├─ extract-agent.md
+│  └─ explain-agent.md
+├─ <span class="h">subagents/</span>
+│  ├─ numbers-fidelity-reviewer
+│  └─ plain-language-reviewer
+├─ <span class="h">commands/</span>
+│  ├─ /demo-check
+│  └─ /nuovo-documento
+└─ <span class="h">skills/</span>spiegare-il-credito</div></div>
+      <div class="card r" style="--d:3; padding:34px 38px">
+        <table class="rev">
+          <thead><tr><th>Area</th><th>AI</th><th>Revisione umana</th></tr></thead>
+          <tbody>
+            <tr><td>Specifica</td><td>Scritta dalla sessione principale di Claude Code</td><td>Tema, persona e vincoli scelti dal team</td></tr>
+            <tr><td>Codice</td><td>Un subagente Claude Code: app, server, 53 test</td><td>Lettura del codice, prova nel browser</td></tr>
+            <tr><td>Calcoli</td><td>TAEG provato su casi fatti a mano</td><td>Verifica di un esperto di credito</td></tr>
+            <tr><td>Esempi</td><td>Tre SECCI di fantasia, TAEG coerenti</td><td>Confronto con moduli SECCI veri</td></tr>
+            <tr><td>Testi</td><td>Skill spiegare-il-credito, filtro dei consigli</td><td>Da far leggere a persone come Samira</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 · Demo -->
+  <section class="slide" data-title="Demo">
+    <div class="glow" style="left:30%; top:-700px"></div>
+    <span class="eyebrow r">Demo live</span>
+    <h2 class="r" style="--d:1">Il percorso di Samira.</h2>
+    <ol class="demo" style="padding:0">
+      <li class="r" style="--d:2"><div>Lavatrice «tasso zero»<span>Quattro domande prima di leggere, poi «In sintesi»</span></div></li>
+      <li class="r" style="--d:3"><div>TAN e TAEG<span>Cosa c'è dentro i 36,00 €, con le frasi del documento</span></div></li>
+      <li class="r" style="--d:4"><div>In cose di tutti i giorni<span>36,00 € sono 30 caffè al bar</span></div></li>
+      <li class="r" style="--d:5"><div>Un numero che non torna<span>Lavatrice in 16 rate: TAEG calcolato 17,19%, scritto 6,08%</span></div></li>
+      <li class="r" style="--d:6"><div>Confronta due offerte<span>«Costa 31,44 € in più, dura 6 mesi in più». Nessuna classifica.</span></div></li>
+      <li class="r" style="--d:7"><div>Quiz di nuovo<span>Prima e dopo, con le risposte e dove trovarle</span></div></li>
+    </ol>
+    <div class="spacer"></div>
+    <p class="r" style="--d:8"><span class="url">localhost:8801</span> <span class="muted" style="font-size:26px">· cd secci-lens/app · npm start</span></p>
+  </section>
+
+  <!-- 14 · Limiti e prossimi passi -->
+  <section class="slide" data-title="Limiti e prossimi passi">
+    <span class="eyebrow r">Limiti &amp; prossimi passi</span>
+    <h2 class="r" style="--d:1">Cosa sa fare oggi.<br><span class="grad">E cosa non ancora.</span></h2>
+    <div class="grid3 cols3" style="margin-top:50px">
+      <div class="card hot r" style="--d:2"><h3>Cosa guadagna Samira</h3><ul>
+        <li>Sa quanto restituisce e quanto costa il credito, in euro</li>
+        <li>Distingue TAN e TAEG</li>
+        <li>Può fare una domanda precisa al finanziatore</li>
+      </ul></div>
+      <div class="card r" style="--d:3"><h3>Limiti di oggi</h3><ul class="no">
+        <li>Solo testo incollato: niente PDF o foto</li>
+        <li>Tasso fisso e rate costanti: niente revolving o tasso variabile</li>
+        <li>Esempi di fantasia, non moduli di finanziatori reali</li>
+        <li>Quiz provato solo da noi</li>
+      </ul></div>
+      <div class="card r" style="--d:4"><h3>Prossimi passi</h3><ul>
+        <li>Lettura di PDF e foto, sul dispositivo</li>
+        <li>Prove con persone e associazioni di consumatori</li>
+        <li>Revisione di un esperto di trasparenza bancaria</li>
+        <li>Altre lingue, per chi non legge bene l'italiano</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 15 · Chiusura -->
+  <section class="slide closing" data-title="Chiusura">
+    <div class="glow" style="left:-300px; bottom:-700px"></div>
+    <div class="bigmark" style="opacity:.8">&gt;</div>
+    <div class="spacer"></div>
+    <h2 class="r" style="--d:1">Samira sa quanto costa.<br>Prima di firmare.</h2>
+    <h2 class="r" style="--d:3; margin-top:10px"><span class="grad">E la scelta resta sua.</span></h2>
+    <p class="lead r" style="--d:5; margin-top:60px">SECCI Lens<span class="gt">&gt;</span> · github.com/milmirk/ti-vedo-bloccato/tree/main/secci-lens</p>
+    <div class="spacer"></div>
+    <div class="brandbar r" style="--d:6"><span><b>Accenture</b> · Application Engineering</span><span>Grazie</span></div>
+  </section>
+
+</div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const hud = document.getElementById('hud');
+  let i = 0;
+
+  const fit = () => {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  };
+
+  const frags = (s) => [...s.querySelectorAll('.frag')];
+
+  const show = (n, fromBack = false) => {
+    i = Math.max(0, Math.min(n, slides.length - 1));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    frags(slides[i]).forEach((f) => f.classList.toggle('on', fromBack));
+    bar.style.width = `${((i + 1) / slides.length) * 100}%`;
+    hud.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    history.replaceState(null, '', `#${i + 1}`);
+  };
+
+  const help = document.querySelector('.help');
+  const hideHelp = () => help.classList.add('gone');
+  setTimeout(hideHelp, 6000);
+
+  const next = () => {
+    hideHelp();
+    const hidden = frags(slides[i]).find((f) => !f.classList.contains('on'));
+    if (hidden) { hidden.classList.add('on'); return; }
+    if (i < slides.length - 1) show(i + 1);
+  };
+
+  const prev = () => {
+    const shown = frags(slides[i]).filter((f) => f.classList.contains('on'));
+    if (shown.length) { shown[shown.length - 1].classList.remove('on'); return; }
+    if (i > 0) show(i - 1, true);
+  };
+
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1, true);
+    else if (e.key.toLowerCase() === 'f') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
+    }
+  });
+  addEventListener('click', (e) => { if (e.clientX > innerWidth * 0.25) next(); else prev(); });
+  let x0 = null;
+  addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+    x0 = null;
+  });
+  addEventListener('resize', fit);
+
+  fit();
+  const start = parseInt(location.hash.slice(1), 10);
+  show(Number.isFinite(start) ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>

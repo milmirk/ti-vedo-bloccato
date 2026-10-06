@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fortuna in Chiaro</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+
+<header class="bar bar-top" role="banner">
+  <div class="brand">Fortuna in Chiaro</div>
+  <ol class="steps" id="steps" aria-label="Avanzamento"></ol>
+  <div class="bar-actions">
+    <span class="demo-badge" id="demo-badge" hidden>Modalità demo</span>
+    <button type="button" class="btn btn-ghost" id="btn-pausa" hidden>Sto per comprare un biglietto</button>
+    <button type="button" class="btn btn-ghost" id="btn-ricomincia-top" hidden>Ricomincia</button>
+  </div>
+  <p class="disclaimer">Strumento educativo: mostra numeri e significati, non dà consigli.</p>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <!-- 1. Benvenuto -->
+  <section class="screen" data-screen="1" aria-labelledby="t1">
+    <div class="hero">
+    <div class="hero-text">
+    <h1 id="t1">Fortuna in Chiaro</h1>
+    <p class="lead"><strong>Un anno di gioco in 10 secondi, con le probabilità ufficiali.</strong></p>
+    <p class="lead">Un simulatore per capire cosa succede in un anno di gioco quotidiano.</p>
+    <label class="toggle">
+      <input type="checkbox" id="demo-toggle">
+      <span>Modalità demo</span>
+    </label>
+    <p class="note" id="demo-info"></p>
+    <p class="privacy">I tuoi dati restano nel tuo browser: nessuna informazione viene salvata o inviata altrove.</p>
+    </div>
+    <!-- Illustrazione decorativa: un biglietto con l'area da grattare "messa in chiaro" da una lente. -->
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <defs>
+          <linearGradient id="hb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6f63f2"/><stop offset="1" stop-color="#3b2fb8"/></linearGradient>
+          <linearGradient id="hs" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9cddb"/><stop offset="1" stop-color="#e7e9f1"/></linearGradient>
+          <clipPath id="hl"><circle cx="292" cy="186" r="62"/></clipPath>
+        </defs>
+        <g transform="rotate(-6 210 160)">
+          <rect x="40" y="40" width="320" height="230" rx="22" fill="#fff" stroke="#dce0ea" stroke-width="2"/>
+          <rect x="40" y="40" width="320" height="64" rx="22" fill="url(#hb)"/>
+          <rect x="40" y="82" width="320" height="22" fill="url(#hb)"/>
+          <circle cx="78" cy="72" r="14" fill="#fff" opacity=".9"/>
+          <rect x="102" y="62" width="120" height="10" rx="5" fill="#fff" opacity=".9"/>
+          <rect x="102" y="78" width="80" height="8" rx="4" fill="#fff" opacity=".55"/>
+          <g fill="url(#hs)">
+            <rect x="68" y="128" width="78" height="56" rx="12"/><rect x="161" y="128" width="78" height="56" rx="12"/><rect x="254" y="128" width="78" height="56" rx="12"/>
+            <rect x="68" y="196" width="78" height="56" rx="12"/><rect x="161" y="196" width="78" height="56" rx="12"/><rect x="254" y="196" width="78" height="56" rx="12"/>
+          </g>
+          <g clip-path="url(#hl)">
+            <rect x="200" y="110" width="200" height="160" fill="#f1f3fa"/>
+            <rect x="248" y="150" width="88" height="14" rx="7" fill="#b02028"/>
+            <rect x="248" y="174" width="34" height="14" rx="7" fill="#0c7a42"/>
+            <rect x="248" y="198" width="66" height="10" rx="5" fill="#4b5368" opacity=".55"/>
+            <rect x="248" y="214" width="46" height="10" rx="5" fill="#4b5368" opacity=".35"/>
+          </g>
+        </g>
+        <circle cx="292" cy="186" r="62" fill="none" stroke="#141a33" stroke-width="10"/>
+        <circle cx="292" cy="186" r="62" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>
+        <path d="M338 232 L386 280" stroke="#141a33" stroke-width="18" stroke-linecap="round"/>
+      </svg>
+    </div>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn btn-primary" id="btn-inizia">Inizia</button>
+    </div>
+  </section>
+
+  <!-- 2. Quiz prima -->
+  <section class="screen" data-screen="2" aria-labelledby="t2" hidden>
+    <h1 id="t2">Prima di cominciare: tre domande</h1>
+    <form id="quiz-prima" class="quiz" novalidate></form>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-2" disabled>Avanti</button>
+    </div>
+  </section>
+
+  <!-- 3. La mia abitudine -->
+  <section class="screen" data-screen="3" aria-labelledby="t3" hidden>
+    <h1 id="t3">La mia abitudine</h1>
+    <div class="layout-2">
+      <div id="lista-giochi" class="giochi"></div>
+      <aside class="riepilogo" aria-live="polite">
+        <h2>La tua spesa</h2>
+        <div id="riepilogo-spesa"></div>
+        <div class="soglia">
+          <label for="soglia">La tua soglia di spesa mensile (facoltativa)</label>
+          <div class="soglia-input"><input type="number" id="soglia" min="0" step="1" inputmode="numeric" placeholder="es. 100"> <span>€ al mese</span></div>
+          <p class="note">La scegli tu. Serve solo a confrontarla con la spesa qui sopra; non viene salvata.</p>
+        </div>
+      </aside>
+    </div>
+    <div class="parlarne" id="parlarne-3" aria-live="polite" hidden></div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-3">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 4. Un anno in 10 secondi -->
+  <section class="screen" data-screen="4" aria-labelledby="t4" hidden>
+    <h1 id="t4">Un anno in 10 secondi</h1>
+    <p class="note" id="seme-info"></p>
+    <div id="vista-mia">
+    <div class="layout-2 sim">
+      <div class="sim-anim">
+        <h2 class="sim-titolo">Quest'anno simulato (un caso)</h2>
+        <div class="progress" aria-hidden="true"><div class="progress-fill" id="sim-progress"></div></div>
+        <p class="giorno" id="sim-giorno">Giorno 0 di 365</p>
+        <div class="contatori" aria-live="off">
+          <div class="cont"><span class="cont-l">Speso</span><span class="cont-v" id="c-speso">0 €</span></div>
+          <div class="cont"><span class="cont-l">Vinto</span><span class="cont-v" id="c-vinto">0 €</span></div>
+          <div class="cont cont-perso"><span class="cont-l">Perso</span><span class="cont-v" id="c-perso">0 €</span></div>
+        </div>
+        <div class="toast-zona"><div class="toast" id="toast" aria-live="polite" hidden></div></div>
+        <p class="conto-vincite" id="conto-vincite"></p>
+        <div class="calendario" id="calendario" aria-hidden="true"></div>
+        <p class="legenda"><span class="sw sw-spesa"></span> giorno di gioco <span class="sw sw-vinto"></span> vincita da 100 € in su</p>
+        <ul class="vincite" id="vincite" aria-label="Vincite da 100 euro in su"></ul>
+      </div>
+      <aside class="atteso" aria-labelledby="t4b">
+        <h2 id="t4b">In media, su tantissimi anni</h2>
+        <p class="note">Calcolato dalla tabella premi ufficiale, non dal caso: è la media che si ottiene su tantissimi anni.</p>
+        <dl id="atteso-dl"></dl>
+        <p id="atteso-media"></p>
+        <div class="stadi-box" id="stadi-anno"></div>
+      </aside>
+    </div>
+    <div class="finale" id="sim-finale" aria-live="polite"></div>
+    </div>
+    <div class="banco" id="vista-banco" aria-live="polite" hidden></div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn" id="btn-rivedi">Rivedi</button>
+      <button type="button" class="btn" id="btn-altro-anno" disabled>Simula un altro anno</button>
+      <button type="button" class="btn" id="btn-banco" disabled>Dalla parte del banco</button>
+      <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 5. Capire i numeri -->
+  <section class="screen" data-screen="5" aria-labelledby="t5" hidden>
+    <h1 id="t5">Capire i numeri</h1>
+    <div class="schede">
+      <article class="scheda" aria-labelledby="sa">
+        <h2 id="sa">La probabilità, vista</h2>
+        <p id="sa-testo"></p>
+        <div class="stadi-box" id="sa-stadi"></div>
+        <canvas id="griglia" width="300" height="300" aria-label="Griglia di 10.000 puntini"></canvas>
+        <label class="slider">Ingrandisci: <strong id="sa-k">1</strong> <span id="sa-u">griglia</span>
+          <input type="range" id="sa-range" min="1" value="1">
+        </label>
+        <p id="sa-esito" aria-live="polite"></p>
+        <p class="fonte" id="sa-fonte"></p>
+      </article>
+      <article class="scheda" aria-labelledby="sb">
+        <h2 id="sb">Perché 'in media' si perde</h2>
+        <p id="sb-testo"></p>
+        <fieldset class="scelte" id="sb-scelte"><legend>Numero di giocate</legend></fieldset>
+        <dl id="sb-dl" aria-live="polite"></dl>
+        <p class="fonte" id="sb-fonte"></p>
+      </article>
+      <article class="scheda" aria-labelledby="sc">
+        <h2 id="sc">I ritardatari non esistono</h2>
+        <p id="sc-testo"></p>
+        <button type="button" class="btn" id="sc-lancia">Lancia 10.000 estrazioni</button>
+        <dl id="sc-dl" aria-live="polite"></dl>
+        <p class="fonte" id="sc-fonte"></p>
+      </article>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" data-nav="next">Avanti</button>
+    </div>
+  </section>
+
+  <!-- 6. Quiz dopo + trasferimento -->
+  <section class="screen" data-screen="6" aria-labelledby="t6" hidden>
+    <h1 id="t6">Di nuovo le tre domande, più una</h1>
+    <form id="quiz-dopo" class="quiz" novalidate></form>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="avanti-6" disabled>Avanti</button>
+    </div>
+  </section>
+
+  <!-- 7. Cruscotto -->
+  <section class="screen" data-screen="7" aria-labelledby="t7" hidden>
+    <h1 id="t7">Il tuo cruscotto</h1>
+    <div id="cruscotto"></div>
+    <div class="parlarne" id="parlarne-7" hidden></div>
+    <p class="privacy">I tuoi dati restano nel tuo browser: nessuna informazione viene salvata o inviata altrove.</p>
+    <div class="nav">
+      <button type="button" class="btn" data-nav="back">Indietro</button>
+      <button type="button" class="btn btn-primary" id="btn-ricomincia">Ricomincia</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="pausa" id="pausa" role="dialog" aria-modal="true" aria-labelledby="pausa-t" hidden>
+  <div class="pausa-box">
+    <h2 id="pausa-t">Pausa e Conto: i numeri di questo biglietto</h2>
+    <label>Biglietto <select id="pausa-gioco"></select></label>
+    <dl id="pausa-dl"></dl>
+    <p class="pausa-timer" id="pausa-timer" aria-live="polite"></p>
+    <button type="button" class="btn btn-primary" id="pausa-chiudi">Chiudi</button>
+  </div>
+</div>
+
+<footer class="bar bar-bottom" role="contentinfo">
+  <p id="numero-verde">Hai domande o preoccupazioni sul gioco? Telefono Verde Nazionale ISS: <strong>800 55 88 22</strong> — gratuito, anonimo, lun-ven 10:00-16:00.</p>
+</footer>
+
+<script src="data/giochi.js"></script>
+<script src="data/quiz.js"></script>
+<script src="src/motore.js"></script>
+<script src="src/ui.js"></script>
+</body>
+</html>

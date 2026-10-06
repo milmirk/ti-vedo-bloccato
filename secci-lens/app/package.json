@@ -1,0 +1,17 @@
+{
+  "name": "secci-lens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Legge il modulo SECCI di un finanziamento e lo spiega in parole semplici, con i conti rifatti dal codice. Educativo, nessun consiglio.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}

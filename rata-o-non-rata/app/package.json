@@ -1,0 +1,17 @@
+{
+  "name": "rata-o-non-rata",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tutte le rate (compra ora paga dopo e finanziamenti in negozio) in un calendario solo. Strumento educativo, nessun consiglio.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}
